@@ -39,8 +39,6 @@ of the issues I encountered:
 
 ### #1 - Manual `project.yml` function entries
 
-#### Problem statement
-
 When you add new functions to your serverless project, you need to manually add
 a `function` entry your `project.yml`.
 
@@ -51,8 +49,6 @@ a `function` entry your `project.yml`.
 2. Provide a utility to scan existing projects and add missing function entries
 
 ### #2 - Mixed dependencies for Typescript projects
-
-#### Problem statement
 
 `doctl` sets up Typescript projects, treating each function as independent
 projects with `package.json` files.
