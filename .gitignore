@@ -1,0 +1,8 @@
+.idea
+.vscode
+.sass-cache
+node_modules
+*.iml
+*.tgz
+*.ini
+*.log
