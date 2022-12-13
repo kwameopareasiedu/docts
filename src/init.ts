@@ -3,13 +3,20 @@ import { cpSync, existsSync, readdirSync, writeFileSync } from "fs";
 import { listFiles } from "./utils";
 import { renderFile } from "ejs";
 
-export default async function init(name: string) {
+export default async function init(
+  name: string,
+  version: string,
+  description: string,
+  author: string
+) {
   const projectDir = resolve(process.cwd(), name);
   const templateDir = resolve(__dirname, "../templates/project");
   const destFiles = existsSync(projectDir) ? readdirSync(projectDir) : [];
 
   if (destFiles.length > 0) {
-    return `error: destination '${resolve(projectDir)}' is not empty`;
+    return console.error(
+      `error: destination '${resolve(projectDir)}' is not empty`
+    );
   }
 
   const templateFilesGenerator = listFiles(templateDir, []);
@@ -23,8 +30,10 @@ export default async function init(name: string) {
 
     cpSync(src, dest, { recursive: true });
 
+    const data = { version, description, author };
+
     try {
-      const content = await renderFile(src);
+      const content = await renderFile(src, data);
       writeFileSync(dest, content);
     } catch (err) {
       console.warn(`warning: ${err.message}'`);

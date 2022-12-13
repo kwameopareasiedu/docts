@@ -4,20 +4,21 @@ const path_1 = require("path");
 const fs_1 = require("fs");
 const utils_1 = require("./utils");
 const ejs_1 = require("ejs");
-async function init(name) {
+async function init(name, version, description, author) {
     const projectDir = (0, path_1.resolve)(process.cwd(), name);
     const templateDir = (0, path_1.resolve)(__dirname, "../templates/project");
     const destFiles = (0, fs_1.existsSync)(projectDir) ? (0, fs_1.readdirSync)(projectDir) : [];
     if (destFiles.length > 0) {
-        return `error: destination '${(0, path_1.resolve)(projectDir)}' is not empty`;
+        return console.error(`error: destination '${(0, path_1.resolve)(projectDir)}' is not empty`);
     }
     const templateFilesGenerator = (0, utils_1.listFiles)(templateDir, []);
     for await (const src of templateFilesGenerator) {
         const relativeSrc = (0, path_1.relative)((0, path_1.resolve)(templateDir), src);
         const dest = (0, path_1.resolve)((0, path_1.resolve)(projectDir), relativeSrc).replaceAll(".ejs", "");
         (0, fs_1.cpSync)(src, dest, { recursive: true });
+        const data = { version, description, author };
         try {
-            const content = await (0, ejs_1.renderFile)(src);
+            const content = await (0, ejs_1.renderFile)(src, data);
             (0, fs_1.writeFileSync)(dest, content);
         }
         catch (err) {

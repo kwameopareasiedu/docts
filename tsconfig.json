@@ -11,5 +11,5 @@
     "jsx": "react"
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "bin"]
+  "exclude": ["node_modules", "bin", "src/**/*.test.ts"]
 }
