@@ -63,7 +63,7 @@ of the major issues (in my opinion) I encountered:
 
 Owing to the above issues, `docts` CLI has the following objectives:
 
-1. [ ] Create a **Typescript** serverless project with a modified file structure
+1. [x] Create a **Typescript** serverless project with a modified file structure
 2. [ ] Add new functions to your serverless project and automatically add a
        function
        entry to the `project.yml`.
