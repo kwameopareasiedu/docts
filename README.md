@@ -1,10 +1,11 @@
-# `dofn-ts`
+# `docts`
 
-A CLI library which adds development features for working with **Typescript**
-functions based on
+**D**igital**O**cean **C**li **T**ypescript **S**erverless (`docts`) is a
+community-led CLI library which adds development features for working with
+**Typescript** functions based on
 DigitalOcean [doctl](https://docs.digitalocean.com/reference/doctl/).
 
-You can use **dofn-ts** to:
+You can use **docts** to:
 
 1. Add functions to your project which auto-update the `project.yml`
 2. Automatically scan function directories and auto-update
@@ -60,18 +61,18 @@ of the major issues (in my opinion) I encountered:
 
 ## Project Goals
 
-Owing to the above issues, `dofn-ts` CLI has the following objectives:
+Owing to the above issues, `docts` CLI has the following objectives:
 
 1. [ ] Create a **Typescript** serverless project with a modified file structure
 2. [ ] Add new functions to your serverless project and automatically add a
-   function
-   entry to the `project.yml`.
+       function
+       entry to the `project.yml`.
 3. [ ] Install all function dependencies at the project root instead of
-   individual
-   function folder roots
+       individual
+       function folder roots
 4. [ ] Watch files and auto-update function `package.json` to include
-   all `import`
-   dependencies used in all function files
+       all `import`
+       dependencies used in all function files
 5. [ ] Scan a compatible project and auto-update the `project.yml` with all
-   function
-   entries
+       function
+       entries

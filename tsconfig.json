@@ -1,5 +1,15 @@
 {
   "compilerOptions": {
-    "esModuleInterop": true
-  }
+    "module": "CommonJS",
+    "target": "ESNext",
+    "rootDir": "./src",
+    "outDir": "./bin/",
+    "noImplicitAny": true,
+    "moduleResolution": "Node",
+    "allowSyntheticDefaultImports": true,
+    "allowJs": true,
+    "jsx": "react"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "bin"]
 }

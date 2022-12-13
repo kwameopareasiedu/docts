@@ -1,5 +1,5 @@
 {
-  "name": "dofn-ts",
+  "name": "docts",
   "version": "0.1.0",
   "description": "A CLI library which adds dev features for working with functions based on DigitalOcean doctl. Add functions, auto-update project.yml and auto update function package.json",
   "author": "Kwame Opare Asiedu",
@@ -11,6 +11,7 @@
   "license": "MIT",
   "devDependencies": {
     "@rollup/plugin-typescript": "^10.0.1",
+    "@types/chai": "^4.3.4",
     "@types/mocha": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^5.39.0",
     "@typescript-eslint/parser": "^5.39.0",
