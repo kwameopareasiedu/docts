@@ -1,6 +1,8 @@
 import { readdirSync } from "fs";
 import { resolve } from "path";
 
+export const defaultIgnores = [".idea/", "node_modules/", "bin/", "yarn.lock"];
+
 export async function* listFiles(
   dir: string,
   ignores: Array<string>

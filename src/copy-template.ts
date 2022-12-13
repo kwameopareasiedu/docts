@@ -2,7 +2,7 @@
 import { program as copyTemplate } from "commander";
 import { cpSync, existsSync, readdirSync } from "fs";
 import { relative, resolve } from "path";
-import { listFiles } from "./utils";
+import { defaultIgnores, listFiles } from "./utils";
 
 copyTemplate
   .argument("<source>", "Template source directory")
@@ -15,7 +15,8 @@ copyTemplate
       return console.error("error: destination is not empty");
     }
 
-    const filesGenerator = listFiles(source, options.ignore);
+    const filesGenerator = listFiles(source, (options.ignore = defaultIgnores));
+
     let fileCount = 0;
 
     for await (const src of filesGenerator) {
