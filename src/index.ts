@@ -2,7 +2,8 @@
 import { program as docts } from "commander";
 import * as inquirer from "inquirer";
 import init from "./init";
-import scan from "./scan";
+import createFunction from "./create-function";
+import { scanProject } from "./utils";
 
 docts
   .name("docts")
@@ -13,7 +14,7 @@ docts
 
 docts
   .command("init")
-  .description("Initializes a new Typescript doctl function project")
+  .description("Initialize a new Typescript doctl function project")
   .argument("<name>", "Project name")
   .action(async name => {
     const answers = (await inquirer.prompt([
@@ -39,21 +40,33 @@ docts
 
 docts
   .command("scan")
-  .description("Scans a project and creates an internal map of functions")
+  .description("Scan a project and creates an internal map of functions")
   .action(() => {
     try {
-      const functions = scan(process.cwd());
+      const projectFns = scanProject(process.cwd());
 
-      if (functions.missing.length > 0) {
+      if (projectFns.missing.length > 0) {
         console.error("error: project.yml declares missing functions:");
-        functions.missing.forEach(pkg => console.error(`- ${pkg}`));
+        projectFns.missing.forEach(pkg => console.error(`- ${pkg}`));
         console.error(
           "remove missing functions from project.yml or create them"
         );
         return;
       }
     } catch (err) {
-      console.error(err.message);
+      console.error(err.message || err.toString());
+    }
+  });
+
+docts
+  .command("fn")
+  .description("Create a new function directory and update project.yml")
+  .argument("<name>", "Function name <package/function> (e.g. user/signup")
+  .action(async name => {
+    try {
+      await createFunction(process.cwd(), name);
+    } catch (err) {
+      console.error(err.message || err.toString());
     }
   });
 

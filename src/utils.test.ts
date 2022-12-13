@@ -3,9 +3,9 @@ import { before } from "mocha";
 import { resetTempDirectory, tempDir } from "./utils";
 import init from "./init";
 import { resolve } from "path";
-import scan from "./scan";
+import { scanProject } from "./utils";
 
-describe("scan.js", function () {
+describe("utils.js", function () {
   const projectName = "docts-project";
   const projectPath = resolve(tempDir, projectName);
 
@@ -23,11 +23,11 @@ describe("scan.js", function () {
       "Kwame Opare Asiedu"
     );
 
-    const fns = scan(projectPath);
+    const projectFns = scanProject(projectPath);
 
-    expect(fns.declared.length).to.be.equal(1);
-    expect(fns.existing.length).to.be.equal(1);
-    expect(fns.missing.length).to.be.equal(0);
-    expect(fns.undeclared.length).to.be.equal(0);
+    expect(projectFns.declared.length).to.be.equal(1);
+    expect(projectFns.existing.length).to.be.equal(1);
+    expect(projectFns.missing.length).to.be.equal(0);
+    expect(projectFns.undeclared.length).to.be.equal(0);
   });
 });

@@ -1,9 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resetTempDirectory = exports.listFiles = exports.tempDir = exports.defaultIgnores = void 0;
+exports.scanProject = exports.isValidFunctionsProject = exports.resetTempDirectory = exports.listFiles = exports.tempDir = exports.defaultIgnores = void 0;
 const fs_1 = require("fs");
 const path_1 = require("path");
 const promises_1 = require("fs/promises");
+const yaml_1 = require("yaml");
 exports.defaultIgnores = [".idea/", "node_modules/", "bin/", "yarn.lock"];
 exports.tempDir = (0, path_1.resolve)(process.cwd(), "temp");
 async function* listFiles(dir, ignores, includeDirs = false) {
@@ -40,3 +41,56 @@ const resetTempDirectory = async () => {
     }
 };
 exports.resetTempDirectory = resetTempDirectory;
+const isValidFunctionsProject = (root) => {
+    const projectYml = (0, path_1.resolve)(root, "project.yml");
+    const srcDir = (0, path_1.resolve)(root, "src");
+    if (!(0, fs_1.existsSync)(projectYml)) {
+        return `error: '${root} is not a valid functions project'. missing project.yml`;
+    }
+    if (!(0, fs_1.existsSync)(srcDir)) {
+        return `error: '${root} is not a valid functions project'. missing src directory`;
+    }
+    return null;
+};
+exports.isValidFunctionsProject = isValidFunctionsProject;
+const scanProject = (root) => {
+    const validityErrors = (0, exports.isValidFunctionsProject)(root);
+    if (validityErrors)
+        throw validityErrors;
+    const projectYml = (0, path_1.resolve)(root, "project.yml");
+    const srcDir = (0, path_1.resolve)(root, "src");
+    const projectConfig = (0, yaml_1.parse)((0, fs_1.readFileSync)(projectYml, "utf-8"));
+    const declaredFunctions = projectConfig.packages.reduce((fnNames, pkg) => {
+        const pkgFns = pkg.functions;
+        const pkgFnNames = pkgFns.map(fn => `${pkg.name}/${fn.name}`);
+        return [...fnNames, ...pkgFnNames];
+    }, []);
+    const existingFunctions = (0, fs_1.readdirSync)(srcDir, { withFileTypes: true })
+        .filter(dirent => dirent.isDirectory())
+        .reduce((fnNames, dirent) => {
+        const pkgFnDirs = (0, fs_1.readdirSync)((0, path_1.resolve)(srcDir, dirent.name), {
+            withFileTypes: true
+        }).filter(dirent => dirent.isDirectory());
+        const pkgFnNames = pkgFnDirs.map(subDirent => `${dirent.name}/${subDirent.name}`);
+        return [...fnNames, ...pkgFnNames];
+    }, []);
+    const missingFunctions = [];
+    for (const pkg of declaredFunctions) {
+        if (!existingFunctions.includes(pkg)) {
+            missingFunctions.push(pkg);
+        }
+    }
+    const undeclaredFunctions = [];
+    for (const pkg of existingFunctions) {
+        if (!declaredFunctions.includes(pkg)) {
+            undeclaredFunctions.push(pkg);
+        }
+    }
+    return {
+        declared: declaredFunctions,
+        existing: existingFunctions,
+        missing: missingFunctions,
+        undeclared: undeclaredFunctions
+    };
+};
+exports.scanProject = scanProject;
