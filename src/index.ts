@@ -4,6 +4,7 @@ import * as inquirer from "inquirer";
 import init from "./init";
 import createFunction from "./create-function";
 import { scanProject } from "./utils";
+import removeFunction from "./remove-function";
 
 docts
   .name("docts")
@@ -61,13 +62,36 @@ docts
 docts.addCommand(
   (() => {
     const fn = new Command("fn");
+
     fn.description("Manage functions in project");
-    fn.command("create")
+
+    fn.command("new")
       .description("Create a new function directory and update project.yml")
       .argument("<name>", "Function name <package/function> (e.g. user/signup")
       .action(async name => {
         try {
           await createFunction(process.cwd(), name);
+        } catch (err) {
+          console.error(err.message || err.toString());
+        }
+      });
+
+    fn.command("remove")
+      .description("Remove a function directory and update project.yml")
+      .argument("<name>", "Function name <package/function> (e.g. user/signup")
+      .action(async name => {
+        try {
+          const answers = (await inquirer.prompt([
+            {
+              name: "confirm",
+              type: "confirm",
+              message: "This action cannot be reversed. Are you sure?"
+            }
+          ])) as any;
+
+          if (answers.confirm === true) {
+            await removeFunction(process.cwd(), name);
+          }
         } catch (err) {
           console.error(err.message || err.toString());
         }

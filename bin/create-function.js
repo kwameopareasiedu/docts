@@ -5,19 +5,18 @@ const fs_1 = require("fs");
 const utils_1 = require("./utils");
 const ejs_1 = require("ejs");
 const yaml_1 = require("yaml");
-const nameRegex = RegExp("^(\\w[\\w|-]+)\\/(\\w[\\w|-]+)$");
 async function createFunction(root, name) {
     const validityErrors = (0, utils_1.isValidFunctionsProject)(root);
     if (validityErrors)
         throw validityErrors;
-    if (!nameRegex.test(name)) {
+    if (!utils_1.fnNameRegex.test(name)) {
         throw "error function names must be in the format 'package/function' (e.g. user/signup)";
     }
     const projectFns = (0, utils_1.scanProject)(root);
     if (projectFns.existing.includes(name)) {
         throw `error: function '${name}' already exists in project`;
     }
-    const [, pkgName, fnName] = nameRegex.exec(name);
+    const [, pkgName, fnName] = utils_1.fnNameRegex.exec(name);
     const srcDir = (0, path_1.resolve)(root, "src");
     const pkgDir = (0, path_1.resolve)(srcDir, pkgName);
     const fnDir = (0, path_1.resolve)(pkgDir, fnName);

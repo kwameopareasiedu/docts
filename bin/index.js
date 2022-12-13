@@ -6,6 +6,7 @@ const inquirer = require("inquirer");
 const init_1 = require("./init");
 const create_function_1 = require("./create-function");
 const utils_1 = require("./utils");
+const remove_function_1 = require("./remove-function");
 commander_1.program
     .name("docts")
     .description("Additional features for working with Typescript serverless functions using DigitalOcean doctl")
@@ -54,12 +55,32 @@ commander_1.program
 commander_1.program.addCommand((() => {
     const fn = new commander_1.Command("fn");
     fn.description("Manage functions in project");
-    fn.command("create")
+    fn.command("new")
         .description("Create a new function directory and update project.yml")
         .argument("<name>", "Function name <package/function> (e.g. user/signup")
         .action(async (name) => {
         try {
             await (0, create_function_1.default)(process.cwd(), name);
+        }
+        catch (err) {
+            console.error(err.message || err.toString());
+        }
+    });
+    fn.command("remove")
+        .description("Remove a function directory and update project.yml")
+        .argument("<name>", "Function name <package/function> (e.g. user/signup")
+        .action(async (name) => {
+        try {
+            const answers = (await inquirer.prompt([
+                {
+                    name: "confirm",
+                    type: "confirm",
+                    message: "This action cannot be reversed. Are you sure?"
+                }
+            ]));
+            if (answers.confirm === true) {
+                await (0, remove_function_1.default)(process.cwd(), name);
+            }
         }
         catch (err) {
             console.error(err.message || err.toString());

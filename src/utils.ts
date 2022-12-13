@@ -7,6 +7,8 @@ export const defaultIgnores = [".idea/", "node_modules/", "bin/", "yarn.lock"];
 
 export const tempDir = resolve(process.cwd(), "temp");
 
+export const fnNameRegex = RegExp("^(\\w[\\w|-]+)\\/(\\w[\\w|-]+)$");
+
 export async function* listFiles(
   dir: string,
   ignores: Array<string>,

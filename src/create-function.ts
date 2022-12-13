@@ -3,6 +3,7 @@ import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import {
   DoFunction,
   DoProject,
+  fnNameRegex,
   isValidFunctionsProject,
   listFiles,
   scanProject
@@ -10,13 +11,11 @@ import {
 import { renderFile } from "ejs";
 import { parse, stringify } from "yaml";
 
-const nameRegex = RegExp("^(\\w[\\w|-]+)\\/(\\w[\\w|-]+)$");
-
 export default async function createFunction(root: string, name: string) {
   const validityErrors = isValidFunctionsProject(root);
   if (validityErrors) throw validityErrors;
 
-  if (!nameRegex.test(name)) {
+  if (!fnNameRegex.test(name)) {
     throw "error function names must be in the format 'package/function' (e.g. user/signup)";
   }
 
@@ -26,7 +25,7 @@ export default async function createFunction(root: string, name: string) {
     throw `error: function '${name}' already exists in project`;
   }
 
-  const [, pkgName, fnName] = nameRegex.exec(name);
+  const [, pkgName, fnName] = fnNameRegex.exec(name);
   const srcDir = resolve(root, "src");
   const pkgDir = resolve(srcDir, pkgName);
   const fnDir = resolve(pkgDir, fnName);
