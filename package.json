@@ -1,7 +1,7 @@
 {
-  "name": "doctl-fn",
-  "version": "1.0.0",
-  "description": "This is a community-led extension library for the 'doctl serverless function' interface",
+  "name": "dofn-ts",
+  "version": "0.1.0",
+  "description": "A CLI library which adds dev features for working with functions based on DigitalOcean doctl. Add functions, auto-update project.yml and auto update function package.json",
   "author": "Kwame Opare Asiedu",
   "main": "dist/index.js",
   "scripts": {
@@ -24,5 +24,7 @@
     "tslib": "^2.4.0",
     "typescript": "^4.8.4"
   },
-  "dependencies": {}
+  "dependencies": {
+    "commander": "^9.4.1"
+  }
 }
