@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { program as docts } from "commander";
+import { program as docts, Command } from "commander";
 import * as inquirer from "inquirer";
 import init from "./init";
 import createFunction from "./create-function";
@@ -58,16 +58,23 @@ docts
     }
   });
 
-docts
-  .command("fn")
-  .description("Create a new function directory and update project.yml")
-  .argument("<name>", "Function name <package/function> (e.g. user/signup")
-  .action(async name => {
-    try {
-      await createFunction(process.cwd(), name);
-    } catch (err) {
-      console.error(err.message || err.toString());
-    }
-  });
+docts.addCommand(
+  (() => {
+    const fn = new Command("fn");
+    fn.description("Manage functions in project");
+    fn.command("create")
+      .description("Create a new function directory and update project.yml")
+      .argument("<name>", "Function name <package/function> (e.g. user/signup")
+      .action(async name => {
+        try {
+          await createFunction(process.cwd(), name);
+        } catch (err) {
+          console.error(err.message || err.toString());
+        }
+      });
+
+    return fn;
+  })()
+);
 
 docts.parse(process.argv);

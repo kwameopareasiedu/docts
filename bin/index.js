@@ -51,16 +51,20 @@ commander_1.program
         console.error(err.message || err.toString());
     }
 });
-commander_1.program
-    .command("fn")
-    .description("Create a new function directory and update project.yml")
-    .argument("<name>", "Function name <package/function> (e.g. user/signup")
-    .action(async (name) => {
-    try {
-        await (0, create_function_1.default)(process.cwd(), name);
-    }
-    catch (err) {
-        console.error(err.message || err.toString());
-    }
-});
+commander_1.program.addCommand((() => {
+    const fn = new commander_1.Command("fn");
+    fn.description("Manage functions in project");
+    fn.command("create")
+        .description("Create a new function directory and update project.yml")
+        .argument("<name>", "Function name <package/function> (e.g. user/signup")
+        .action(async (name) => {
+        try {
+            await (0, create_function_1.default)(process.cwd(), name);
+        }
+        catch (err) {
+            console.error(err.message || err.toString());
+        }
+    });
+    return fn;
+})());
 commander_1.program.parse(process.argv);
