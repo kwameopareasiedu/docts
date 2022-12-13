@@ -1,5 +1,5 @@
-import { existsSync, readdirSync, rmdirSync, rmSync, statSync } from "fs";
-import { resolve, normalize } from "path";
+import { existsSync, readdirSync } from "fs";
+import { normalize, resolve } from "path";
 import { rm } from "fs/promises";
 
 export const defaultIgnores = [".idea/", "node_modules/", "bin/", "yarn.lock"];
@@ -45,3 +45,19 @@ export const resetTempDirectory = async () => {
     console.log(err);
   }
 };
+
+export interface DoPackage {
+  readonly name: string;
+  readonly environment?: Record<string, string>;
+  readonly parameters?: Record<string, string>;
+  readonly annotations?: Record<string, string>;
+  readonly functions?: Array<DoFunction>;
+}
+
+export interface DoFunction extends DoPackage {
+  binary?: boolean;
+  main?: string;
+  runtime?: string;
+  web: boolean;
+  limits: Record<string, string>;
+}

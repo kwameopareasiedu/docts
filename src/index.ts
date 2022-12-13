@@ -2,6 +2,7 @@
 import { program as docts } from "commander";
 import * as inquirer from "inquirer";
 import init from "./init";
+import scan from "./scan";
 
 docts
   .name("docts")
@@ -34,6 +35,26 @@ docts
     ])) as any;
 
     await init(name, answers.version, answers.description, answers.author);
+  });
+
+docts
+  .command("scan")
+  .description("Scans a project and creates an internal map of functions")
+  .action(() => {
+    try {
+      const functions = scan(process.cwd());
+
+      if (functions.missing.length > 0) {
+        console.error("error: project.yml declares missing functions:");
+        functions.missing.forEach(pkg => console.error(`- ${pkg}`));
+        console.error(
+          "remove missing functions from project.yml or create them"
+        );
+        return;
+      }
+    } catch (err) {
+      console.error(err.message);
+    }
   });
 
 docts.parse(process.argv);
