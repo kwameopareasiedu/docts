@@ -25,9 +25,9 @@ describe("utils.js", function () {
 
     const projectFns = scanProject(projectPath);
 
-    expect(projectFns.declared.length).to.be.equal(1);
-    expect(projectFns.existing.length).to.be.equal(1);
-    expect(projectFns.missing.length).to.be.equal(0);
-    expect(projectFns.undeclared.length).to.be.equal(0);
+    expect(projectFns.fns.declared.length).to.be.equal(1);
+    expect(projectFns.fns.existing.length).to.be.equal(1);
+    expect(projectFns.fns.missing.length).to.be.equal(0);
+    expect(projectFns.fns.undeclared.length).to.be.equal(0);
   });
 });

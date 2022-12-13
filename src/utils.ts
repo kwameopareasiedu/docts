@@ -9,6 +9,8 @@ export const tempDir = resolve(process.cwd(), "temp");
 
 export const fnNameRegex = RegExp("^(\\w[\\w|-]+)\\/(\\w[\\w|-]+)$");
 
+export const pkgNameRegex = RegExp("^(\\w[\\w|-]+)$");
+
 export async function* listFiles(
   dir: string,
   ignores: Array<string>,
@@ -72,14 +74,13 @@ export const scanProject = (root: string) => {
   const srcDir = resolve(root, "src");
   const projectConfig = parse(readFileSync(projectYml, "utf-8"));
 
-  const declaredFunctions = (projectConfig.packages as Array<DoPackage>).reduce(
-    (fnNames, pkg) => {
-      const pkgFns = pkg.functions;
-      const pkgFnNames = pkgFns.map(fn => `${pkg.name}/${fn.name}`);
-      return [...fnNames, ...pkgFnNames];
-    },
-    []
-  );
+  const declaredPackages = projectConfig.packages as Array<DoPackage>;
+
+  const declaredFunctions = declaredPackages.reduce((fnNames, pkg) => {
+    const pkgFns = pkg.functions;
+    const pkgFnNames = pkgFns.map(fn => `${pkg.name}/${fn.name}`);
+    return [...fnNames, ...pkgFnNames];
+  }, []);
 
   const existingFunctions = readdirSync(srcDir, { withFileTypes: true })
     .filter(dirent => dirent.isDirectory())
@@ -97,25 +98,30 @@ export const scanProject = (root: string) => {
 
   const missingFunctions = [];
 
-  for (const pkg of declaredFunctions) {
-    if (!existingFunctions.includes(pkg)) {
-      missingFunctions.push(pkg);
+  for (const fn of declaredFunctions) {
+    if (!existingFunctions.includes(fn)) {
+      missingFunctions.push(fn);
     }
   }
 
   const undeclaredFunctions = [];
 
-  for (const pkg of existingFunctions) {
-    if (!declaredFunctions.includes(pkg)) {
-      undeclaredFunctions.push(pkg);
+  for (const fn of existingFunctions) {
+    if (!declaredFunctions.includes(fn)) {
+      undeclaredFunctions.push(fn);
     }
   }
 
   return {
-    declared: declaredFunctions,
-    existing: existingFunctions,
-    missing: missingFunctions,
-    undeclared: undeclaredFunctions
+    pkgs: {
+      declared: declaredPackages.map(pkg => pkg.name)
+    },
+    fns: {
+      declared: declaredFunctions,
+      existing: existingFunctions,
+      missing: missingFunctions,
+      undeclared: undeclaredFunctions
+    }
   };
 };
 

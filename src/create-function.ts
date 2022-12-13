@@ -21,7 +21,7 @@ export default async function createFunction(root: string, name: string) {
 
   const projectFns = scanProject(root);
 
-  if (projectFns.existing.includes(name)) {
+  if (projectFns.fns.existing.includes(name)) {
     throw `error: function '${name}' already exists in project`;
   }
 

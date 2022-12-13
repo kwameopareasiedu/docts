@@ -13,7 +13,7 @@ async function createFunction(root, name) {
         throw "error function names must be in the format 'package/function' (e.g. user/signup)";
     }
     const projectFns = (0, utils_1.scanProject)(root);
-    if (projectFns.existing.includes(name)) {
+    if (projectFns.fns.existing.includes(name)) {
         throw `error: function '${name}' already exists in project`;
     }
     const [, pkgName, fnName] = utils_1.fnNameRegex.exec(name);

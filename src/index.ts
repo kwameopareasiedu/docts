@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { program as docts, Command } from "commander";
+import { Command, program as docts } from "commander";
 import * as inquirer from "inquirer";
 import init from "./init";
 import createFunction from "./create-function";
@@ -46,14 +46,16 @@ docts
     try {
       const projectFns = scanProject(process.cwd());
 
-      if (projectFns.missing.length > 0) {
+      if (projectFns.fns.missing.length > 0) {
         console.error("error: project.yml declares missing functions:");
-        projectFns.missing.forEach(pkg => console.error(`- ${pkg}`));
+        projectFns.fns.missing.forEach(pkg => console.error(`- ${pkg}`));
         console.error(
           "remove missing functions from project.yml or create them"
         );
         return;
       }
+
+      console.dir(projectFns, { depth: null });
     } catch (err) {
       console.error(err.message || err.toString());
     }
@@ -81,17 +83,7 @@ docts.addCommand(
       .argument("<name>", "Function name <package/function> (e.g. user/signup")
       .action(async name => {
         try {
-          const answers = (await inquirer.prompt([
-            {
-              name: "confirm",
-              type: "confirm",
-              message: "This action cannot be reversed. Are you sure?"
-            }
-          ])) as any;
-
-          if (answers.confirm === true) {
-            await removeFunction(process.cwd(), name);
-          }
+          await removeFunction(process.cwd(), name);
         } catch (err) {
           console.error(err.message || err.toString());
         }

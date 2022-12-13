@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.scanProject = exports.isValidFunctionsProject = exports.resetTempDirectory = exports.listFiles = exports.fnNameRegex = exports.tempDir = exports.defaultIgnores = void 0;
+exports.scanProject = exports.isValidFunctionsProject = exports.resetTempDirectory = exports.listFiles = exports.pkgNameRegex = exports.fnNameRegex = exports.tempDir = exports.defaultIgnores = void 0;
 const fs_1 = require("fs");
 const path_1 = require("path");
 const promises_1 = require("fs/promises");
@@ -8,6 +8,7 @@ const yaml_1 = require("yaml");
 exports.defaultIgnores = [".idea/", "node_modules/", "bin/", "yarn.lock"];
 exports.tempDir = (0, path_1.resolve)(process.cwd(), "temp");
 exports.fnNameRegex = RegExp("^(\\w[\\w|-]+)\\/(\\w[\\w|-]+)$");
+exports.pkgNameRegex = RegExp("^(\\w[\\w|-]+)$");
 async function* listFiles(dir, ignores, includeDirs = false) {
     const dirents = (0, fs_1.readdirSync)(dir, { withFileTypes: true });
     for (const dirent of dirents) {
@@ -61,7 +62,8 @@ const scanProject = (root) => {
     const projectYml = (0, path_1.resolve)(root, "project.yml");
     const srcDir = (0, path_1.resolve)(root, "src");
     const projectConfig = (0, yaml_1.parse)((0, fs_1.readFileSync)(projectYml, "utf-8"));
-    const declaredFunctions = projectConfig.packages.reduce((fnNames, pkg) => {
+    const declaredPackages = projectConfig.packages;
+    const declaredFunctions = declaredPackages.reduce((fnNames, pkg) => {
         const pkgFns = pkg.functions;
         const pkgFnNames = pkgFns.map(fn => `${pkg.name}/${fn.name}`);
         return [...fnNames, ...pkgFnNames];
@@ -76,22 +78,27 @@ const scanProject = (root) => {
         return [...fnNames, ...pkgFnNames];
     }, []);
     const missingFunctions = [];
-    for (const pkg of declaredFunctions) {
-        if (!existingFunctions.includes(pkg)) {
-            missingFunctions.push(pkg);
+    for (const fn of declaredFunctions) {
+        if (!existingFunctions.includes(fn)) {
+            missingFunctions.push(fn);
         }
     }
     const undeclaredFunctions = [];
-    for (const pkg of existingFunctions) {
-        if (!declaredFunctions.includes(pkg)) {
-            undeclaredFunctions.push(pkg);
+    for (const fn of existingFunctions) {
+        if (!declaredFunctions.includes(fn)) {
+            undeclaredFunctions.push(fn);
         }
     }
     return {
-        declared: declaredFunctions,
-        existing: existingFunctions,
-        missing: missingFunctions,
-        undeclared: undeclaredFunctions
+        pkgs: {
+            declared: declaredPackages.map(pkg => pkg.name)
+        },
+        fns: {
+            declared: declaredFunctions,
+            existing: existingFunctions,
+            missing: missingFunctions,
+            undeclared: undeclaredFunctions
+        }
     };
 };
 exports.scanProject = scanProject;

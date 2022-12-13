@@ -41,12 +41,13 @@ commander_1.program
     .action(() => {
     try {
         const projectFns = (0, utils_1.scanProject)(process.cwd());
-        if (projectFns.missing.length > 0) {
+        if (projectFns.fns.missing.length > 0) {
             console.error("error: project.yml declares missing functions:");
-            projectFns.missing.forEach(pkg => console.error(`- ${pkg}`));
+            projectFns.fns.missing.forEach(pkg => console.error(`- ${pkg}`));
             console.error("remove missing functions from project.yml or create them");
             return;
         }
+        console.dir(projectFns, { depth: null });
     }
     catch (err) {
         console.error(err.message || err.toString());
@@ -71,16 +72,7 @@ commander_1.program.addCommand((() => {
         .argument("<name>", "Function name <package/function> (e.g. user/signup")
         .action(async (name) => {
         try {
-            const answers = (await inquirer.prompt([
-                {
-                    name: "confirm",
-                    type: "confirm",
-                    message: "This action cannot be reversed. Are you sure?"
-                }
-            ]));
-            if (answers.confirm === true) {
-                await (0, remove_function_1.default)(process.cwd(), name);
-            }
+            await (0, remove_function_1.default)(process.cwd(), name);
         }
         catch (err) {
             console.error(err.message || err.toString());
