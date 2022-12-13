@@ -64,7 +64,7 @@ of the major issues (in my opinion) I encountered:
 Owing to the above issues, `docts` CLI has the following objectives:
 
 1. [x] Create a **Typescript** serverless project with a modified file structure
-2. [ ] Add/Remove functions to/from your serverless project and automatically
+2. [x] Add/Remove functions to/from your serverless project and automatically
        update the `project.yml`.
 3. [ ] Install all function dependencies at the project root instead of
        individual function folder roots
