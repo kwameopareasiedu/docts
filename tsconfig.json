@@ -1,14 +1,13 @@
 {
   "compilerOptions": {
-    "module": "CommonJS",
+    "module": "ESNext",
     "target": "ESNext",
     "rootDir": "./src",
     "outDir": "./bin/",
     "noImplicitAny": true,
     "moduleResolution": "Node",
     "allowSyntheticDefaultImports": true,
-    "allowJs": true,
-    "jsx": "react"
+    "allowJs": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "bin", "src/**/*.test.ts"]

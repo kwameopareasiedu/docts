@@ -51,24 +51,26 @@ export const resetTempDirectory = async () => {
   }
 };
 
-export const isValidFunctionsProject = (root: string) => {
+export const validateProjectRoot = (root: string) => {
+  const packageJson = resolve(root, "package.json");
   const projectYml = resolve(root, "project.yml");
   const srcDir = resolve(root, "src");
 
+  if (!existsSync(packageJson)) {
+    throw `error: '${root} is not a valid functions project'. missing package.json`;
+  }
+
   if (!existsSync(projectYml)) {
-    return `error: '${root} is not a valid functions project'. missing project.yml`;
+    throw `error: '${root} is not a valid functions project'. missing project.yml`;
   }
 
   if (!existsSync(srcDir)) {
-    return `error: '${root} is not a valid functions project'. missing src directory`;
+    throw `error: '${root} is not a valid functions project'. missing src directory`;
   }
-
-  return null;
 };
 
 export const scanProject = (root: string) => {
-  const validityErrors = isValidFunctionsProject(root);
-  if (validityErrors) throw validityErrors;
+  validateProjectRoot(root);
 
   const projectYml = resolve(root, "project.yml");
   const srcDir = resolve(root, "src");
@@ -143,4 +145,9 @@ export interface DoFunction extends Omit<DoPackage, "functions"> {
   runtime?: string;
   web?: boolean;
   limits?: Record<string, string>;
+}
+
+export interface NpmProject {
+  readonly name?: Record<string, string>;
+  readonly dependencies: Record<string, string>;
 }

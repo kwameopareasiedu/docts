@@ -1,6 +1,6 @@
 import { relative, resolve } from "path";
 import { cpSync, existsSync, readdirSync, writeFileSync } from "fs";
-import { listFiles } from "./utils";
+import { listFiles } from "./utils.js";
 import { renderFile } from "ejs";
 
 export default async function init(

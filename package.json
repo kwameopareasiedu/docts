@@ -4,6 +4,7 @@
   "description": "A CLI library which adds dev features for working with functions based on DigitalOcean doctl. Add functions, auto-update project.yml and auto update function package.json",
   "author": "Kwame Opare Asiedu",
   "main": "dist/index.js",
+  "type": "module",
   "scripts": {
     "build": "rollup --config",
     "test": "ts-mocha -p tsconfig.json src/**/*.test.ts",
@@ -29,8 +30,10 @@
   },
   "dependencies": {
     "commander": "^9.4.1",
+    "dependency-tree": "^8.1.2",
     "ejs": "^3.1.8",
     "inquirer": "8.2.5",
+    "parse-imports": "^1.1.0",
     "yaml": "^2.1.3"
   }
 }

@@ -1,25 +1,23 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const path_1 = require("path");
-const fs_1 = require("fs");
-const utils_1 = require("./utils");
-const ejs_1 = require("ejs");
-async function init(name, version, description, author) {
-    const projectDir = (0, path_1.resolve)(process.cwd(), name);
-    const templateDir = (0, path_1.resolve)(__dirname, "../templates/project");
-    const destFiles = (0, fs_1.existsSync)(projectDir) ? (0, fs_1.readdirSync)(projectDir) : [];
+import { relative, resolve } from "path";
+import { cpSync, existsSync, readdirSync, writeFileSync } from "fs";
+import { listFiles } from "./utils.js";
+import { renderFile } from "ejs";
+export default async function init(name, version, description, author) {
+    const projectDir = resolve(process.cwd(), name);
+    const templateDir = resolve(__dirname, "../templates/project");
+    const destFiles = existsSync(projectDir) ? readdirSync(projectDir) : [];
     if (destFiles.length > 0) {
-        return console.error(`error: destination '${(0, path_1.resolve)(projectDir)}' is not empty`);
+        return console.error(`error: destination '${resolve(projectDir)}' is not empty`);
     }
-    const templateFilesGenerator = (0, utils_1.listFiles)(templateDir, []);
+    const templateFilesGenerator = listFiles(templateDir, []);
     for await (const src of templateFilesGenerator) {
-        const relativeSrc = (0, path_1.relative)((0, path_1.resolve)(templateDir), src);
-        const dest = (0, path_1.resolve)((0, path_1.resolve)(projectDir), relativeSrc).replaceAll(".ejs", "");
-        (0, fs_1.cpSync)(src, dest, { recursive: true });
+        const relativeSrc = relative(resolve(templateDir), src);
+        const dest = resolve(resolve(projectDir), relativeSrc).replaceAll(".ejs", "");
+        cpSync(src, dest, { recursive: true });
         const data = { version, description, author };
         try {
-            const content = await (0, ejs_1.renderFile)(src, data);
-            (0, fs_1.writeFileSync)(dest, content);
+            const content = await renderFile(src, data);
+            writeFileSync(dest, content);
         }
         catch (err) {
             console.warn(`warning: ${err.message}'`);
@@ -33,4 +31,3 @@ async function init(name, version, description, author) {
     console.log("3. Create functions in 'src/'");
     console.log("More on DigitalOcean Functions: https://docs.digitalocean.com/products/functions/");
 }
-exports.default = init;

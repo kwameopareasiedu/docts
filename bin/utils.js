@@ -1,18 +1,15 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.scanProject = exports.isValidFunctionsProject = exports.resetTempDirectory = exports.listFiles = exports.packageNameRegex = exports.functionNameRegex = exports.tempDir = exports.defaultIgnores = void 0;
-const fs_1 = require("fs");
-const path_1 = require("path");
-const promises_1 = require("fs/promises");
-const yaml_1 = require("yaml");
-exports.defaultIgnores = [".idea/", "node_modules/", "bin/", "yarn.lock"];
-exports.tempDir = (0, path_1.resolve)(process.cwd(), "temp");
-exports.functionNameRegex = RegExp("^(\\w[\\w|-]+)\\/(\\w[\\w|-]+)$");
-exports.packageNameRegex = RegExp("^(\\w[\\w|-]+)$");
-async function* listFiles(root, ignores, includeDirs = false) {
-    const dirents = (0, fs_1.readdirSync)(root, { withFileTypes: true });
+import { existsSync, readdirSync, readFileSync } from "fs";
+import { normalize, resolve } from "path";
+import { rm } from "fs/promises";
+import { parse } from "yaml";
+export const defaultIgnores = [".idea/", "node_modules/", "bin/", "yarn.lock"];
+export const tempDir = resolve(process.cwd(), "temp");
+export const functionNameRegex = RegExp("^(\\w[\\w|-]+)\\/(\\w[\\w|-]+)$");
+export const packageNameRegex = RegExp("^(\\w[\\w|-]+)$");
+export async function* listFiles(root, ignores, includeDirs = false) {
+    const dirents = readdirSync(root, { withFileTypes: true });
     for (const dirent of dirents) {
-        const res = (0, path_1.resolve)(root, dirent.name);
+        const res = resolve(root, dirent.name);
         if (!ignores.includes(dirent.name) &&
             !ignores.includes(dirent.name + "/")) {
             if (dirent.isDirectory()) {
@@ -25,16 +22,15 @@ async function* listFiles(root, ignores, includeDirs = false) {
         }
     }
 }
-exports.listFiles = listFiles;
-const resetTempDirectory = async () => {
-    if (!(0, fs_1.existsSync)(exports.tempDir))
+export const resetTempDirectory = async () => {
+    if (!existsSync(tempDir))
         return;
-    const gitignoreFile = (0, path_1.resolve)(exports.tempDir, ".gitignore");
-    const listGen = listFiles(exports.tempDir, [], true);
+    const gitignoreFile = resolve(tempDir, ".gitignore");
+    const listGen = listFiles(tempDir, [], true);
     try {
         for await (const dirent of listGen) {
-            if ((0, path_1.normalize)(dirent) !== (0, path_1.normalize)(gitignoreFile)) {
-                await (0, promises_1.rm)(dirent, { recursive: true, force: true });
+            if (normalize(dirent) !== normalize(gitignoreFile)) {
+                await rm(dirent, { recursive: true, force: true });
             }
         }
     }
@@ -42,36 +38,35 @@ const resetTempDirectory = async () => {
         console.log(err);
     }
 };
-exports.resetTempDirectory = resetTempDirectory;
-const isValidFunctionsProject = (root) => {
-    const projectYml = (0, path_1.resolve)(root, "project.yml");
-    const srcDir = (0, path_1.resolve)(root, "src");
-    if (!(0, fs_1.existsSync)(projectYml)) {
-        return `error: '${root} is not a valid functions project'. missing project.yml`;
+export const validateProjectRoot = (root) => {
+    const packageJson = resolve(root, "package.json");
+    const projectYml = resolve(root, "project.yml");
+    const srcDir = resolve(root, "src");
+    if (!existsSync(packageJson)) {
+        throw `error: '${root} is not a valid functions project'. missing package.json`;
     }
-    if (!(0, fs_1.existsSync)(srcDir)) {
-        return `error: '${root} is not a valid functions project'. missing src directory`;
+    if (!existsSync(projectYml)) {
+        throw `error: '${root} is not a valid functions project'. missing project.yml`;
     }
-    return null;
+    if (!existsSync(srcDir)) {
+        throw `error: '${root} is not a valid functions project'. missing src directory`;
+    }
 };
-exports.isValidFunctionsProject = isValidFunctionsProject;
-const scanProject = (root) => {
-    const validityErrors = (0, exports.isValidFunctionsProject)(root);
-    if (validityErrors)
-        throw validityErrors;
-    const projectYml = (0, path_1.resolve)(root, "project.yml");
-    const srcDir = (0, path_1.resolve)(root, "src");
-    const projectConfig = (0, yaml_1.parse)((0, fs_1.readFileSync)(projectYml, "utf-8"));
+export const scanProject = (root) => {
+    validateProjectRoot(root);
+    const projectYml = resolve(root, "project.yml");
+    const srcDir = resolve(root, "src");
+    const projectConfig = parse(readFileSync(projectYml, "utf-8"));
     const declaredPackages = projectConfig.packages;
     const declaredFunctions = declaredPackages.reduce((fnNames, pkg) => {
         const pkgFns = pkg.functions;
         const pkgFnNames = pkgFns.map(fn => `${pkg.name}/${fn.name}`);
         return [...fnNames, ...pkgFnNames];
     }, []);
-    const existingFunctions = (0, fs_1.readdirSync)(srcDir, { withFileTypes: true })
+    const existingFunctions = readdirSync(srcDir, { withFileTypes: true })
         .filter(dirent => dirent.isDirectory())
         .reduce((fnNames, dirent) => {
-        const pkgFnDirs = (0, fs_1.readdirSync)((0, path_1.resolve)(srcDir, dirent.name), {
+        const pkgFnDirs = readdirSync(resolve(srcDir, dirent.name), {
             withFileTypes: true
         }).filter(dirent => dirent.isDirectory());
         const pkgFnNames = pkgFnDirs.map(subDirent => `${dirent.name}/${subDirent.name}`);
@@ -101,4 +96,3 @@ const scanProject = (root) => {
         }
     };
 };
-exports.scanProject = scanProject;

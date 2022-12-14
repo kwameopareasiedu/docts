@@ -2,7 +2,7 @@
 import { program as copyTemplate } from "commander";
 import { cpSync, existsSync, readdirSync } from "fs";
 import { relative, resolve } from "path";
-import { defaultIgnores, listFiles } from "./utils";
+import { defaultIgnores, listFiles } from "./utils.js";
 
 copyTemplate
   .argument("<source>", "Template source directory")

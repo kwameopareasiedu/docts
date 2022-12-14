@@ -1,38 +1,34 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const path_1 = require("path");
-const fs_1 = require("fs");
-const utils_1 = require("./utils");
-const ejs_1 = require("ejs");
-const yaml_1 = require("yaml");
-async function createFunction(root, fnPath) {
-    const validityErrors = (0, utils_1.isValidFunctionsProject)(root);
-    if (validityErrors)
-        throw validityErrors;
-    if (!utils_1.functionNameRegex.test(fnPath)) {
+import { relative, resolve } from "path";
+import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { functionNameRegex, validateProjectRoot, listFiles, scanProject } from "./utils.js";
+import { renderFile } from "ejs";
+import { parse, stringify } from "yaml";
+export default async function createFunction(root, fnPath) {
+    validateProjectRoot(root);
+    if (!functionNameRegex.test(fnPath)) {
         throw "error function paths must be in the format 'package/function' (e.g. user/signup)";
     }
-    const scan = (0, utils_1.scanProject)(root);
+    const scan = scanProject(root);
     if (scan.functions.existing.includes(fnPath)) {
         throw `error: function '${fnPath}' already exists in project`;
     }
-    const [, pkgName, fnName] = utils_1.functionNameRegex.exec(fnPath);
-    const srcDir = (0, path_1.resolve)(root, "src");
-    const pkgDir = (0, path_1.resolve)(srcDir, pkgName);
-    const fnDir = (0, path_1.resolve)(pkgDir, fnName);
-    if (!(0, fs_1.existsSync)(pkgDir)) {
-        (0, fs_1.mkdirSync)(pkgDir);
+    const [, pkgName, fnName] = functionNameRegex.exec(fnPath);
+    const srcDir = resolve(root, "src");
+    const pkgDir = resolve(srcDir, pkgName);
+    const fnDir = resolve(pkgDir, fnName);
+    if (!existsSync(pkgDir)) {
+        mkdirSync(pkgDir);
     }
-    const templateDir = (0, path_1.resolve)(__dirname, "../templates/function");
-    const templateFilesGenerator = (0, utils_1.listFiles)(templateDir, []);
+    const templateDir = resolve(__dirname, "../templates/function");
+    const templateFilesGenerator = listFiles(templateDir, []);
     for await (const templateSrc of templateFilesGenerator) {
-        const relativeSrc = (0, path_1.relative)((0, path_1.resolve)(templateDir), templateSrc);
-        const templateDest = (0, path_1.resolve)((0, path_1.resolve)(fnDir), relativeSrc).replaceAll(".ejs", "");
-        (0, fs_1.cpSync)(templateSrc, templateDest, { recursive: true });
+        const relativeSrc = relative(resolve(templateDir), templateSrc);
+        const templateDest = resolve(resolve(fnDir), relativeSrc).replaceAll(".ejs", "");
+        cpSync(templateSrc, templateDest, { recursive: true });
         try {
             const templateData = { name: fnName };
-            const content = await (0, ejs_1.renderFile)(templateSrc, templateData);
-            (0, fs_1.writeFileSync)(templateDest, content);
+            const content = await renderFile(templateSrc, templateData);
+            writeFileSync(templateDest, content);
         }
         catch (err) {
             console.warn(`warning: ${err.message}'`);
@@ -40,8 +36,8 @@ async function createFunction(root, fnPath) {
         }
         console.log(`created '${templateDest}'`);
     }
-    const projectYml = (0, path_1.resolve)(root, "project.yml");
-    const projectConfig = (0, yaml_1.parse)((0, fs_1.readFileSync)(projectYml, "utf-8"));
+    const projectYml = resolve(root, "project.yml");
+    const projectConfig = parse(readFileSync(projectYml, "utf-8"));
     const fnConfigEntry = {
         name: fnName,
         binary: false,
@@ -70,9 +66,8 @@ async function createFunction(root, fnPath) {
             functions: [fnConfigEntry]
         });
     }
-    (0, fs_1.writeFileSync)(projectYml, (0, yaml_1.stringify)(projectConfig));
-    console.log(`Created function in '${(0, path_1.relative)(root, fnDir)}'!\n`);
+    writeFileSync(projectYml, stringify(projectConfig));
+    console.log(`Created function in '${relative(root, fnDir)}'!\n`);
     console.log(`1. Update the environment, parameters and annotations for '${fnPath}'`);
-    console.log(`2. Open '${(0, path_1.relative)(root, (0, path_1.resolve)(fnDir, "index.ts"))}' to edit your function`);
+    console.log(`2. Open '${relative(root, resolve(fnDir, "index.ts"))}' to edit your function`);
 }
-exports.default = createFunction;

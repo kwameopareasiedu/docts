@@ -3,18 +3,16 @@ import { readFileSync, writeFileSync } from "fs";
 import {
   DoProject,
   functionNameRegex,
-  isValidFunctionsProject,
+  validateProjectRoot,
   packageNameRegex,
   scanProject
-} from "./utils";
+} from "./utils.js";
 import { parse, stringify } from "yaml";
 import { rm } from "fs/promises";
 import * as inquirer from "inquirer";
 
 export default async function removeFunction(root: string, fnPath: string) {
-  const validityErrors = isValidFunctionsProject(root);
-
-  if (validityErrors) throw validityErrors;
+  validateProjectRoot(root);
 
   if (functionNameRegex.test(fnPath)) {
     await destroyFunction(root, fnPath);

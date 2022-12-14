@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 import { Command, program as docts } from "commander";
 import * as inquirer from "inquirer";
-import init from "./init";
-import createFunction from "./create-function";
-import { scanProject } from "./utils";
-import removeFunction from "./remove-function";
+import init from "./init.js";
+import createFunction from "./create-function.js";
+import { scanProject } from "./utils.js";
+import removeFunction from "./remove-function.js";
+import buildProject from "./build-project.js";
 
 docts
   .name("docts")
@@ -99,5 +100,16 @@ docts.addCommand(
     return fn;
   })()
 );
+
+docts
+  .command("build")
+  .description("Builds a project 'src' into 'packages' for deployment")
+  .action(async () => {
+    try {
+      await buildProject(process.cwd());
+    } catch (err) {
+      console.error(err.message || err.toString());
+    }
+  });
 
 docts.parse(process.argv);

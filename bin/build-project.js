@@ -1,16 +1,57 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const path_1 = require("path");
-const utils_1 = require("./utils");
-async function buildProject(root) {
-    const validityErrors = (0, utils_1.isValidFunctionsProject)(root);
-    if (validityErrors)
-        throw validityErrors;
-    const scan = (0, utils_1.scanProject)(root);
-    const srcDir = (0, path_1.resolve)(root, "src");
-    const fnDirs = scan.functions.existing.map(fnPath => (0, path_1.resolve)(srcDir, fnPath));
-    // if (scan.functions.existing.includes(fnPath)) {
-    //   throw `error: function '${fnPath}' already exists in project`;
-    // }
+import { relative, resolve } from "path";
+import { scanProject, validateProjectRoot } from "./utils.js";
+import dependencyTree from "dependency-tree";
+import parseImports from "parse-imports";
+import { readFileSync, writeFileSync } from "fs";
+export default async function buildProject(root) {
+    validateProjectRoot(root);
+    const scan = scanProject(root);
+    const srcDir = resolve(root, "src");
+    const fnDirs = scan.functions.existing.map(fnPath => resolve(srcDir, fnPath));
+    const rootPackageJson = resolve(root, "package.json");
+    const rootPackageConfig = JSON.parse(readFileSync(rootPackageJson, { encoding: "utf-8" }));
+    const rootPackageDependencies = rootPackageConfig.dependencies;
+    for (const fnDir of fnDirs) {
+        const fnIndexFileName = resolve(fnDir, "index.ts");
+        const fnDependencyFileNames = dependencyTree.toList({
+            filename: fnIndexFileName,
+            directory: root,
+            noTypeDefinitions: true,
+            nodeModulesConfig: {
+                entry: "module"
+            }
+        });
+        let fnDependencyImports = {};
+        for (const fnDependencyFileName of fnDependencyFileNames) {
+            const code = readFileSync(fnDependencyFileName, { encoding: "utf-8" });
+            const imports = [
+                ...(await parseImports(code, {
+                    resolveFrom: root
+                }))
+            ];
+            const dependencyImports = imports
+                .filter(im => im.moduleSpecifier.type === "package")
+                .reduce((imports, im) => {
+                const importName = im.moduleSpecifier.value;
+                const importVersion = rootPackageDependencies[importName];
+                if (importVersion) {
+                    return { ...imports, [importName]: importVersion };
+                }
+                else
+                    return { ...imports };
+            }, {});
+            fnDependencyImports = { ...fnDependencyImports, ...dependencyImports };
+        }
+        // Write imports to function package.json file
+        const fnPackageJson = resolve(fnDir, "package.json");
+        const fnPackageConfig = JSON.parse(readFileSync(fnPackageJson, { encoding: "utf-8" }));
+        const newFnPackageConfig = {
+            ...fnPackageConfig,
+            dependencies: fnDependencyImports
+        };
+        writeFileSync(fnPackageJson, JSON.stringify(newFnPackageConfig, null, 2));
+        const dependencyCount = Object.keys(fnDependencyImports).length;
+        console.log(`updated ${dependencyCount} ${dependencyCount === 1 ? "dependency" : "dependencies"} in '${relative(srcDir, fnDir)}/package.json'`);
+    }
+    console.log("\nBuilt 'src' into 'packages' dir. You can deploy with doctl!");
 }
-exports.default = buildProject;
