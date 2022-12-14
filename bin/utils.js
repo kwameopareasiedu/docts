@@ -1,18 +1,18 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.scanProject = exports.isValidFunctionsProject = exports.resetTempDirectory = exports.listFiles = exports.pkgNameRegex = exports.fnNameRegex = exports.tempDir = exports.defaultIgnores = void 0;
+exports.scanProject = exports.isValidFunctionsProject = exports.resetTempDirectory = exports.listFiles = exports.packageNameRegex = exports.functionNameRegex = exports.tempDir = exports.defaultIgnores = void 0;
 const fs_1 = require("fs");
 const path_1 = require("path");
 const promises_1 = require("fs/promises");
 const yaml_1 = require("yaml");
 exports.defaultIgnores = [".idea/", "node_modules/", "bin/", "yarn.lock"];
 exports.tempDir = (0, path_1.resolve)(process.cwd(), "temp");
-exports.fnNameRegex = RegExp("^(\\w[\\w|-]+)\\/(\\w[\\w|-]+)$");
-exports.pkgNameRegex = RegExp("^(\\w[\\w|-]+)$");
-async function* listFiles(dir, ignores, includeDirs = false) {
-    const dirents = (0, fs_1.readdirSync)(dir, { withFileTypes: true });
+exports.functionNameRegex = RegExp("^(\\w[\\w|-]+)\\/(\\w[\\w|-]+)$");
+exports.packageNameRegex = RegExp("^(\\w[\\w|-]+)$");
+async function* listFiles(root, ignores, includeDirs = false) {
+    const dirents = (0, fs_1.readdirSync)(root, { withFileTypes: true });
     for (const dirent of dirents) {
-        const res = (0, path_1.resolve)(dir, dirent.name);
+        const res = (0, path_1.resolve)(root, dirent.name);
         if (!ignores.includes(dirent.name) &&
             !ignores.includes(dirent.name + "/")) {
             if (dirent.isDirectory()) {
@@ -90,10 +90,10 @@ const scanProject = (root) => {
         }
     }
     return {
-        pkgs: {
+        packages: {
             declared: declaredPackages.map(pkg => pkg.name)
         },
-        fns: {
+        functions: {
             declared: declaredFunctions,
             existing: existingFunctions,
             missing: missingFunctions,

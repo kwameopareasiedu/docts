@@ -43,11 +43,11 @@ export default async function init(
     console.log(`created '${dest}'`);
   }
 
-  console.log(`Scaffolded project in '${projectDir}'!\n`);
+  console.log(`Created project in '${projectDir}'!\n`);
   console.log(`1. 'cd ${name}'`);
   console.log("2. 'yarn install' to install dependencies");
-  console.log("3. 'yarn dev' to watch files for changes");
+  console.log("3. Create functions in 'src/'");
   console.log(
-    "4. Get started with DigitalOcean functions: https://docs.digitalocean.com/products/functions/"
+    "More on DigitalOcean Functions: https://docs.digitalocean.com/products/functions/"
   );
 }

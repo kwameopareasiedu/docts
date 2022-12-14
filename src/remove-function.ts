@@ -2,36 +2,37 @@ import { relative, resolve } from "path";
 import { readFileSync, writeFileSync } from "fs";
 import {
   DoProject,
-  fnNameRegex,
+  functionNameRegex,
   isValidFunctionsProject,
-  pkgNameRegex,
+  packageNameRegex,
   scanProject
 } from "./utils";
 import { parse, stringify } from "yaml";
 import { rm } from "fs/promises";
 import * as inquirer from "inquirer";
 
-export default async function removeFunction(root: string, name: string) {
+export default async function removeFunction(root: string, fnPath: string) {
   const validityErrors = isValidFunctionsProject(root);
+
   if (validityErrors) throw validityErrors;
 
-  if (fnNameRegex.test(name)) {
-    await destroyFunction(root, name);
-  } else if (pkgNameRegex.test(name)) {
-    await destroyPackage(root, name);
+  if (functionNameRegex.test(fnPath)) {
+    await destroyFunction(root, fnPath);
+  } else if (packageNameRegex.test(fnPath)) {
+    await destroyPackage(root, fnPath);
   } else {
     throw "error function names must be in the format 'package/function' (e.g. user/signup) or 'package' (e.g. user)";
   }
 }
 
-const destroyFunction = async (root: string, name: string) => {
+const destroyFunction = async (root: string, fnPath: string) => {
   const projectFns = scanProject(root);
 
-  if (!projectFns.fns.existing.includes(name)) {
-    throw `error: function '${name}' does not exist in project`;
+  if (!projectFns.functions.existing.includes(fnPath)) {
+    throw `error: function '${fnPath}' does not exist in project`;
   }
 
-  const [, pkgName, fnName] = fnNameRegex.exec(name);
+  const [, pkgName, fnName] = functionNameRegex.exec(fnPath);
   const srcDir = resolve(root, "src");
   const pkgDir = resolve(srcDir, pkgName);
   const fnDir = resolve(pkgDir, fnName);
@@ -40,7 +41,7 @@ const destroyFunction = async (root: string, name: string) => {
     {
       name: "confirm",
       type: "confirm",
-      message: `You are about to remove the '${name}' function. This action is destructive and cannot be reversed. Are you sure?`
+      message: `You are about to remove the '${fnPath}' function. This action is destructive and cannot be reversed. Are you sure?`
     }
   ])) as any;
 
@@ -49,12 +50,12 @@ const destroyFunction = async (root: string, name: string) => {
     const projectYml = resolve(root, "project.yml");
     const projectConfig = parse(readFileSync(projectYml, "utf-8")) as DoProject;
 
-    for (const doPkg of projectConfig.packages) {
-      if (doPkg.name === pkgName) {
-        const fnIndex = doPkg.functions.map(fn => fn.name).indexOf(fnName);
+    for (const pkgConfig of projectConfig.packages) {
+      if (pkgConfig.name === pkgName) {
+        const fnIndex = pkgConfig.functions.map(fn => fn.name).indexOf(fnName);
 
         if (fnIndex !== -1) {
-          doPkg.functions.splice(fnIndex, 1);
+          pkgConfig.functions.splice(fnIndex, 1);
         }
 
         break;
@@ -67,14 +68,14 @@ const destroyFunction = async (root: string, name: string) => {
   }
 };
 
-const destroyPackage = async (root: string, name: string) => {
+const destroyPackage = async (root: string, pkgPath: string) => {
   const scan = scanProject(root);
 
-  if (!scan.pkgs.declared.includes(name)) {
-    throw `error: package '${name}' does not exist in project`;
+  if (!scan.packages.declared.includes(pkgPath)) {
+    throw `error: package '${pkgPath}' does not exist in project`;
   }
 
-  const [, pkgName] = pkgNameRegex.exec(name);
+  const [, pkgName] = packageNameRegex.exec(pkgPath);
   const srcDir = resolve(root, "src");
   const pkgDir = resolve(srcDir, pkgName);
 
@@ -82,7 +83,7 @@ const destroyPackage = async (root: string, name: string) => {
     {
       name: "confirm",
       type: "confirm",
-      message: `You are about to remove the '${name}' package and ALL of its functions. This action is destructive and cannot be reversed. Are you sure?`
+      message: `You are about to remove the '${pkgPath}' package and ALL of its functions. This action is destructive and cannot be reversed. Are you sure?`
     }
   ])) as any;
 
@@ -91,9 +92,12 @@ const destroyPackage = async (root: string, name: string) => {
     const projectYml = resolve(root, "project.yml");
     const projectConfig = parse(readFileSync(projectYml, "utf-8")) as DoProject;
 
-    for (const doPkg of projectConfig.packages) {
-      if (doPkg.name === pkgName) {
-        projectConfig.packages.splice(projectConfig.packages.indexOf(doPkg), 1);
+    for (const pkgConfig of projectConfig.packages) {
+      if (pkgConfig.name === pkgName) {
+        projectConfig.packages.splice(
+          projectConfig.packages.indexOf(pkgConfig),
+          1
+        );
         break;
       }
     }

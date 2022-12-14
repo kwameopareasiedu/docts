@@ -3,7 +3,7 @@ import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import {
   DoFunction,
   DoProject,
-  fnNameRegex,
+  functionNameRegex,
   isValidFunctionsProject,
   listFiles,
   scanProject
@@ -11,21 +11,22 @@ import {
 import { renderFile } from "ejs";
 import { parse, stringify } from "yaml";
 
-export default async function createFunction(root: string, name: string) {
+export default async function createFunction(root: string, fnPath: string) {
   const validityErrors = isValidFunctionsProject(root);
+
   if (validityErrors) throw validityErrors;
 
-  if (!fnNameRegex.test(name)) {
-    throw "error function names must be in the format 'package/function' (e.g. user/signup)";
+  if (!functionNameRegex.test(fnPath)) {
+    throw "error function paths must be in the format 'package/function' (e.g. user/signup)";
   }
 
-  const projectFns = scanProject(root);
+  const scan = scanProject(root);
 
-  if (projectFns.fns.existing.includes(name)) {
-    throw `error: function '${name}' already exists in project`;
+  if (scan.functions.existing.includes(fnPath)) {
+    throw `error: function '${fnPath}' already exists in project`;
   }
 
-  const [, pkgName, fnName] = fnNameRegex.exec(name);
+  const [, pkgName, fnName] = functionNameRegex.exec(fnPath);
   const srcDir = resolve(root, "src");
   const pkgDir = resolve(srcDir, pkgName);
   const fnDir = resolve(pkgDir, fnName);
@@ -37,23 +38,25 @@ export default async function createFunction(root: string, name: string) {
   const templateDir = resolve(__dirname, "../templates/function");
   const templateFilesGenerator = listFiles(templateDir, []);
 
-  for await (const src of templateFilesGenerator) {
-    const relativeSrc = relative(resolve(templateDir), src);
-    const dest = resolve(resolve(fnDir), relativeSrc).replaceAll(".ejs", "");
+  for await (const templateSrc of templateFilesGenerator) {
+    const relativeSrc = relative(resolve(templateDir), templateSrc);
+    const templateDest = resolve(resolve(fnDir), relativeSrc).replaceAll(
+      ".ejs",
+      ""
+    );
 
-    cpSync(src, dest, { recursive: true });
-
-    const data = { name: fnName };
+    cpSync(templateSrc, templateDest, { recursive: true });
 
     try {
-      const content = await renderFile(src, data);
-      writeFileSync(dest, content);
+      const templateData = { name: fnName };
+      const content = await renderFile(templateSrc, templateData);
+      writeFileSync(templateDest, content);
     } catch (err) {
       console.warn(`warning: ${err.message}'`);
-      console.warn(`warning: could not render content to '${dest}'`);
+      console.warn(`warning: could not render content to '${templateDest}'`);
     }
 
-    console.log(`created '${dest}'`);
+    console.log(`created '${templateDest}'`);
   }
 
   const projectYml = resolve(root, "project.yml");
@@ -70,17 +73,17 @@ export default async function createFunction(root: string, name: string) {
     limits: {}
   };
 
-  let packageExists = false;
+  let pkgExists = false;
 
-  for (const doPkg of projectConfig.packages) {
-    if (doPkg.name === pkgName) {
-      doPkg.functions.push(fnConfigEntry);
-      packageExists = true;
+  for (const pkgConfig of projectConfig.packages) {
+    if (pkgConfig.name === pkgName) {
+      pkgConfig.functions.push(fnConfigEntry);
+      pkgExists = true;
       break;
     }
   }
 
-  if (!packageExists) {
+  if (!pkgExists) {
     projectConfig.packages.push({
       name: pkgName,
       parameters: {},
@@ -94,7 +97,7 @@ export default async function createFunction(root: string, name: string) {
 
   console.log(`Created function in '${relative(root, fnDir)}'!\n`);
   console.log(
-    `1. Update the environment, parameters and annotations for '${name}'`
+    `1. Update the environment, parameters and annotations for '${fnPath}'`
   );
   console.log(
     `2. Open '${relative(

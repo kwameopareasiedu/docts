@@ -23,11 +23,11 @@ describe("utils.js", function () {
       "Kwame Opare Asiedu"
     );
 
-    const projectFns = scanProject(projectPath);
+    const scan = scanProject(projectPath);
 
-    expect(projectFns.fns.declared.length).to.be.equal(1);
-    expect(projectFns.fns.existing.length).to.be.equal(1);
-    expect(projectFns.fns.missing.length).to.be.equal(0);
-    expect(projectFns.fns.undeclared.length).to.be.equal(0);
+    expect(scan.functions.declared.length).to.be.equal(1);
+    expect(scan.functions.existing.length).to.be.equal(1);
+    expect(scan.functions.missing.length).to.be.equal(0);
+    expect(scan.functions.undeclared.length).to.be.equal(0);
   });
 });

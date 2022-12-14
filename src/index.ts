@@ -18,44 +18,48 @@ docts
   .description("Initialize a new Typescript doctl function project")
   .argument("<name>", "Project name")
   .action(async name => {
-    const answers = (await inquirer.prompt([
-      {
-        name: "description",
-        type: "input",
-        message: "Project description"
-      },
-      {
-        name: "author",
-        type: "input",
-        message: "Author"
-      },
-      {
-        name: "version",
-        type: "input",
-        message: "Version"
-      }
-    ])) as any;
+    try {
+      const answers = (await inquirer.prompt([
+        {
+          name: "description",
+          type: "input",
+          message: "Project description"
+        },
+        {
+          name: "author",
+          type: "input",
+          message: "Author"
+        },
+        {
+          name: "version",
+          type: "input",
+          message: "Version"
+        }
+      ])) as any;
 
-    await init(name, answers.version, answers.description, answers.author);
+      await init(name, answers.version, answers.description, answers.author);
+    } catch (err) {
+      console.error(err.message || err.toString());
+    }
   });
 
 docts
   .command("scan")
-  .description("Scan a project and creates an internal map of functions")
+  .description("Scan a project and return a map of packages and functions")
   .action(() => {
     try {
-      const projectFns = scanProject(process.cwd());
+      const scan = scanProject(process.cwd());
 
-      if (projectFns.fns.missing.length > 0) {
+      if (scan.functions.missing.length > 0) {
         console.error("error: project.yml declares missing functions:");
-        projectFns.fns.missing.forEach(pkg => console.error(`- ${pkg}`));
+        scan.functions.missing.forEach(pkg => console.error(`- ${pkg}`));
         console.error(
           "remove missing functions from project.yml or create them"
         );
         return;
       }
 
-      console.dir(projectFns, { depth: null });
+      console.dir(scan, { depth: null });
     } catch (err) {
       console.error(err.message || err.toString());
     }
@@ -68,8 +72,8 @@ docts.addCommand(
     fn.description("Manage functions in project");
 
     fn.command("new")
-      .description("Create a new function directory and update project.yml")
-      .argument("<name>", "Function name <package/function> (e.g. user/signup")
+      .description("Create a new function and update project.yml")
+      .argument("<name>", "Function name (e.g. user/signup)")
       .action(async name => {
         try {
           await createFunction(process.cwd(), name);
@@ -79,8 +83,11 @@ docts.addCommand(
       });
 
     fn.command("remove")
-      .description("Remove a function directory and update project.yml")
-      .argument("<name>", "Function name <package/function> (e.g. user/signup")
+      .description("Remove a function/package and update project.yml")
+      .argument(
+        "<name>",
+        "Function name (e.g. user/signup) or package name (e.g. user)"
+      )
       .action(async name => {
         try {
           await removeFunction(process.cwd(), name);

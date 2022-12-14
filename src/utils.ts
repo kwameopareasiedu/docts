@@ -7,19 +7,19 @@ export const defaultIgnores = [".idea/", "node_modules/", "bin/", "yarn.lock"];
 
 export const tempDir = resolve(process.cwd(), "temp");
 
-export const fnNameRegex = RegExp("^(\\w[\\w|-]+)\\/(\\w[\\w|-]+)$");
+export const functionNameRegex = RegExp("^(\\w[\\w|-]+)\\/(\\w[\\w|-]+)$");
 
-export const pkgNameRegex = RegExp("^(\\w[\\w|-]+)$");
+export const packageNameRegex = RegExp("^(\\w[\\w|-]+)$");
 
 export async function* listFiles(
-  dir: string,
+  root: string,
   ignores: Array<string>,
   includeDirs = false
 ): AsyncGenerator<any> {
-  const dirents = readdirSync(dir, { withFileTypes: true });
+  const dirents = readdirSync(root, { withFileTypes: true });
 
   for (const dirent of dirents) {
-    const res = resolve(dir, dirent.name);
+    const res = resolve(root, dirent.name);
 
     if (
       !ignores.includes(dirent.name) &&
@@ -113,10 +113,10 @@ export const scanProject = (root: string) => {
   }
 
   return {
-    pkgs: {
+    packages: {
       declared: declaredPackages.map(pkg => pkg.name)
     },
-    fns: {
+    functions: {
       declared: declaredFunctions,
       existing: existingFunctions,
       missing: missingFunctions,
