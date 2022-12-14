@@ -9,7 +9,7 @@ import buildProject from "./build-project.js";
 polyfillGlobals();
 docts
     .name("docts")
-    .description("Support CLI which enhances the development experience when working with DigitalOcean 'doctl' typescript serverless functions")
+    .description("Enhances the development experience of DigitalOcean 'doctl serverless' when working with Typescript function projects")
     .version("0.1.0");
 docts
     .command("init")

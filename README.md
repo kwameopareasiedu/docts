@@ -1,15 +1,9 @@
 # `docts`
 
 **D**igital**O**cean **C**li **T**ypescript **S**erverless (`docts`) is a
-community-led CLI library which adds development features for working with
-**Typescript** functions based on
-DigitalOcean [doctl](https://docs.digitalocean.com/reference/doctl/).
-
-You can use **docts** to:
-
-1. Add functions to your project which auto-update the `project.yml`
-2. Automatically scan function directories and auto-update
-   function's `package.json` so you don't have to
+community-led CLI library which enhances the development experience of
+DigitalOcean [doctl serverless](https://docs.digitalocean.com/reference/doctl/)
+when working with **Typescript** function projects.
 
 ## Introduction
 
@@ -38,9 +32,13 @@ using it for a while, I find it ... _somewhat lacking_.
 
 ## Issues with `doctl serverless function`
 
-I develop using NodeJS/Typescript and aside initializing the Typescript project,
-the `doctl serverless function` interface does not do much locally. Here's three
-of the major issues (in my opinion) I encountered:
+When dealing with **Typescript**, there is a transpilation step to Javascript
+which other languages have and aside initializing the Typescript project, the
+`doctl serverless function` interface does not do much locally.
+
+The transpilation of TS to JS makes things a bit tricky for working with
+Typescript projects. Here's three of the major issues (in my opinion) I've
+identified:
 
 1. When you add new functions to your serverless project, you need to manually
    add a `function` entry your `project.yml`.
@@ -65,10 +63,11 @@ Owing to the above issues, `docts` CLI has the following objectives:
 
 1. [x] Create a **Typescript** serverless project with a modified file structure
 2. [x] Add/Remove functions to/from your serverless project and automatically
-       update the `project.yml`.
-3. [x] Install all function dependencies at the project root instead of
-       individual function folder roots
-4. [ ] Watch files and auto-update function `package.json` to include
-       all `import` dependencies used in all function files
-5. [ ] Scan a compatible project and auto-update the `project.yml` with all
-       function entries
+   update the `project.yml`.
+3. [x] Install dependencies in the project root instead of function roots
+4. [x] In the build step, traverse through each function's `import` statements,
+   building a dependency graph. From this graph, automatically pick out the
+   function's dependencies and save in the function's `package.json`
+5. [x] Build `packages` folder in the correct structure for deployment with
+   `doctl`
+6. [ ] Bundle function file and all dependent files into one file
