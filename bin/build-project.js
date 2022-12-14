@@ -2,7 +2,7 @@ import { relative, resolve } from "path";
 import { ensureRootIsValidFunctionsProject, scanProject } from "./utils.js";
 import dependencyTree from "dependency-tree";
 import parseImports from "parse-imports";
-import { cpSync, readFileSync, writeFileSync } from "fs";
+import { cpSync, existsSync, readFileSync, writeFileSync } from "fs";
 export default async function buildProject(root) {
     ensureRootIsValidFunctionsProject(root);
     const scan = scanProject(root);
@@ -46,16 +46,21 @@ export default async function buildProject(root) {
         }
         // Write function dependencies to its package.json file
         const fnPackageJson = resolve(fnSrcDir, "package.json");
-        const fnPackageConfig = JSON.parse(readFileSync(fnPackageJson, { encoding: "utf-8" }));
-        const newFnPackageConfig = {
-            ...fnPackageConfig,
-            dependencies: fnDependencies
-        };
-        writeFileSync(fnPackageJson, JSON.stringify(newFnPackageConfig, null, 2));
-        // Copy 'src/<fnDir>/package.json' to 'packages/<fnDir>/package.json'
-        cpSync(fnPackageJson, resolve(fnPackageDir, "package.json"));
-        const dependencyCount = Object.keys(fnDependencies).length;
-        console.log(`updated ${dependencyCount} ${dependencyCount === 1 ? "dependency" : "dependencies"} in '${relative(srcDir, fnSrcDir)}/package.json'`);
+        if (existsSync(fnPackageJson)) {
+            const fnPackageConfig = JSON.parse(readFileSync(fnPackageJson, { encoding: "utf-8" }));
+            const newFnPackageConfig = {
+                ...fnPackageConfig,
+                dependencies: fnDependencies
+            };
+            writeFileSync(fnPackageJson, JSON.stringify(newFnPackageConfig, null, 2));
+            // Copy 'src/<fnDir>/package.json' to 'packages/<fnDir>/package.json'
+            cpSync(fnPackageJson, resolve(fnPackageDir, "package.json"));
+            const dependencyCount = Object.keys(fnDependencies).length;
+            console.log(`updated ${dependencyCount} ${dependencyCount === 1 ? "dependency" : "dependencies"} in '${relative(srcDir, fnSrcDir)}/package.json'`);
+        }
+        else {
+            console.warn(`skipping '${relative(srcDir, fnSrcDir)}' due to missing package.json!`);
+        }
     }
     console.log("\nBuilt 'src' into 'packages' dir. You can deploy with doctl!");
 }

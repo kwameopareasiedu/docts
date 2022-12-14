@@ -6,7 +6,7 @@ import {
 } from "./utils.js";
 import dependencyTree from "dependency-tree";
 import parseImports from "parse-imports";
-import { cpSync, readFileSync, writeFileSync } from "fs";
+import { cpSync, existsSync, readFileSync, writeFileSync } from "fs";
 
 export default async function buildProject(root: string) {
   ensureRootIsValidFunctionsProject(root);
@@ -63,26 +63,33 @@ export default async function buildProject(root: string) {
 
     // Write function dependencies to its package.json file
     const fnPackageJson = resolve(fnSrcDir, "package.json");
-    const fnPackageConfig = JSON.parse(
-      readFileSync(fnPackageJson, { encoding: "utf-8" })
-    ) as NpmProject;
 
-    const newFnPackageConfig: NpmProject = {
-      ...fnPackageConfig,
-      dependencies: fnDependencies
-    };
+    if (existsSync(fnPackageJson)) {
+      const fnPackageConfig = JSON.parse(
+        readFileSync(fnPackageJson, { encoding: "utf-8" })
+      ) as NpmProject;
 
-    writeFileSync(fnPackageJson, JSON.stringify(newFnPackageConfig, null, 2));
+      const newFnPackageConfig: NpmProject = {
+        ...fnPackageConfig,
+        dependencies: fnDependencies
+      };
 
-    // Copy 'src/<fnDir>/package.json' to 'packages/<fnDir>/package.json'
-    cpSync(fnPackageJson, resolve(fnPackageDir, "package.json"));
+      writeFileSync(fnPackageJson, JSON.stringify(newFnPackageConfig, null, 2));
 
-    const dependencyCount = Object.keys(fnDependencies).length;
-    console.log(
-      `updated ${dependencyCount} ${
-        dependencyCount === 1 ? "dependency" : "dependencies"
-      } in '${relative(srcDir, fnSrcDir)}/package.json'`
-    );
+      // Copy 'src/<fnDir>/package.json' to 'packages/<fnDir>/package.json'
+      cpSync(fnPackageJson, resolve(fnPackageDir, "package.json"));
+
+      const dependencyCount = Object.keys(fnDependencies).length;
+      console.log(
+        `updated ${dependencyCount} ${
+          dependencyCount === 1 ? "dependency" : "dependencies"
+        } in '${relative(srcDir, fnSrcDir)}/package.json'`
+      );
+    } else {
+      console.warn(
+        `skipping '${relative(srcDir, fnSrcDir)}' due to missing package.json!`
+      );
+    }
   }
 
   console.log("\nBuilt 'src' into 'packages' dir. You can deploy with doctl!");

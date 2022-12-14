@@ -12,7 +12,7 @@ polyfillGlobals();
 docts
   .name("docts")
   .description(
-    "Additional features for working with Typescript serverless functions using DigitalOcean doctl"
+    "Support CLI which enhances the development experience when working with DigitalOcean 'doctl' typescript serverless functions"
   )
   .version("0.1.0");
 
