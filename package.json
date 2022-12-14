@@ -7,7 +7,7 @@
   "type": "module",
   "scripts": {
     "build": "rollup --config",
-    "test": "ts-mocha -p tsconfig.json src/**/*.test.ts",
+    "test": "ts-mocha -p tsconfig.json test/**/*.test.ts",
     "dev": "tsc --watch",
     "copy": "node bin/copy-template.js"
   },
@@ -15,16 +15,17 @@
   "devDependencies": {
     "@types/chai": "^4.3.4",
     "@types/ejs": "^3.1.1",
-    "@types/inquirer": "7.3.3",
+    "@types/inquirer": "^9.0.3",
     "@types/mocha": "^10.0.0",
-    "@types/node": "^18.11.14",
-    "@typescript-eslint/eslint-plugin": "^5.39.0",
-    "@typescript-eslint/parser": "^5.39.0",
+    "@types/node": "^18.11.15",
+    "@typescript-eslint/eslint-plugin": "^5.46.1",
+    "@typescript-eslint/parser": "^5.46.1",
     "chai": "^4.3.6",
     "eslint": "^8.25.0",
-    "mocha": "^10.0.0",
+    "mocha": "^10.2.0",
     "prettier": "2.8.1",
     "ts-mocha": "^10.0.0",
+    "ts-node": "^10.9.1",
     "tslib": "^2.4.0",
     "typescript": "^4.8.4"
   },
@@ -32,7 +33,7 @@
     "commander": "^9.4.1",
     "dependency-tree": "^8.1.2",
     "ejs": "^3.1.8",
-    "inquirer": "8.2.5",
+    "inquirer": "9.1.4",
     "parse-imports": "^1.1.0",
     "yaml": "^2.1.3"
   }

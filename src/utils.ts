@@ -1,7 +1,8 @@
 import { existsSync, readdirSync, readFileSync } from "fs";
-import { normalize, resolve } from "path";
+import { dirname, normalize, resolve } from "path";
 import { rm } from "fs/promises";
 import { parse } from "yaml";
+import { fileURLToPath } from "url";
 
 export const defaultIgnores = [".idea/", "node_modules/", "bin/", "yarn.lock"];
 
@@ -49,6 +50,11 @@ export const resetTempDirectory = async () => {
   } catch (err) {
     console.log(err);
   }
+};
+
+export const polyfillGlobals = () => {
+  // eslint-disable-next-line no-global-assign
+  global.__dirname = dirname(fileURLToPath(import.meta.url));
 };
 
 export const validateProjectRoot = (root: string) => {

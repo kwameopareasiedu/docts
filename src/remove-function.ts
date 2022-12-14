@@ -9,7 +9,7 @@ import {
 } from "./utils.js";
 import { parse, stringify } from "yaml";
 import { rm } from "fs/promises";
-import * as inquirer from "inquirer";
+import inquirer from "inquirer";
 
 export default async function removeFunction(root: string, fnPath: string) {
   validateProjectRoot(root);

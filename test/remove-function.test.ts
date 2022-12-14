@@ -1,17 +1,23 @@
 import { expect } from "chai";
 import { before } from "mocha";
-import { resetTempDirectory, scanProject, tempDir } from "./utils";
-import init from "./init";
+import {
+  polyfillGlobals,
+  resetTempDirectory,
+  scanProject,
+  tempDir
+} from "../src/utils";
+import init from "../src/init";
 import { resolve } from "path";
-import createFunction from "./create-function";
-import removeFunction from "./remove-function";
+import createFunction from "../src/create-function";
+import removeFunction from "../src/remove-function";
 
-describe("create-function.js", function () {
+describe("create-function", function () {
   const projectName = "docts-project";
   const projectPath = resolve(tempDir, projectName);
   const functionPath = "test/fn";
 
   before(async () => {
+    polyfillGlobals();
     await resetTempDirectory();
   });
 

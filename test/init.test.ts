@@ -1,14 +1,20 @@
 import { expect } from "chai";
 import { before } from "mocha";
-import { listFiles, resetTempDirectory, tempDir } from "./utils";
-import init from "./init";
+import {
+  listFiles,
+  polyfillGlobals,
+  resetTempDirectory,
+  tempDir
+} from "../src/utils";
+import init from "../src/init";
 import { resolve } from "path";
 
-describe("init.js", function () {
+describe("init", function () {
   const projectName = "docts-project";
   const projectPath = resolve(tempDir, projectName);
 
   before(async () => {
+    polyfillGlobals();
     await resetTempDirectory();
   });
 

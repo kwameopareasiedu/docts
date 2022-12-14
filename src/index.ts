@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 import { Command, program as docts } from "commander";
-import * as inquirer from "inquirer";
+import inquirer from "inquirer";
 import init from "./init.js";
 import createFunction from "./create-function.js";
-import { scanProject } from "./utils.js";
+import { polyfillGlobals, scanProject } from "./utils.js";
 import removeFunction from "./remove-function.js";
 import buildProject from "./build-project.js";
+
+polyfillGlobals();
 
 docts
   .name("docts")

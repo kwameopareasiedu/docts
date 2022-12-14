@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from "fs";
 import { functionNameRegex, validateProjectRoot, packageNameRegex, scanProject } from "./utils.js";
 import { parse, stringify } from "yaml";
 import { rm } from "fs/promises";
-import * as inquirer from "inquirer";
+import inquirer from "inquirer";
 export default async function removeFunction(root, fnPath) {
     validateProjectRoot(root);
     if (functionNameRegex.test(fnPath)) {
