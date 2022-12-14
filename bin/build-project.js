@@ -1,16 +1,15 @@
 import { relative, resolve } from "path";
-import { scanProject, validateProjectRoot } from "./utils.js";
+import { scanProject, ensureRootIsValidFunctionsProject } from "./utils.js";
 import dependencyTree from "dependency-tree";
 import parseImports from "parse-imports";
 import { readFileSync, writeFileSync } from "fs";
 export default async function buildProject(root) {
-    validateProjectRoot(root);
+    ensureRootIsValidFunctionsProject(root);
     const scan = scanProject(root);
     const srcDir = resolve(root, "src");
     const fnDirs = scan.functions.existing.map(fnPath => resolve(srcDir, fnPath));
     const rootPackageJson = resolve(root, "package.json");
     const rootPackageConfig = JSON.parse(readFileSync(rootPackageJson, { encoding: "utf-8" }));
-    const rootPackageDependencies = rootPackageConfig.dependencies;
     for (const fnDir of fnDirs) {
         const fnIndexFileName = resolve(fnDir, "index.ts");
         const fnDependencyFileNames = dependencyTree.toList({
@@ -33,7 +32,7 @@ export default async function buildProject(root) {
                 .filter(im => im.moduleSpecifier.type === "package")
                 .reduce((imports, im) => {
                 const importName = im.moduleSpecifier.value;
-                const importVersion = rootPackageDependencies[importName];
+                const importVersion = rootPackageConfig.dependencies[importName];
                 if (importVersion) {
                     return { ...imports, [importName]: importVersion };
                 }

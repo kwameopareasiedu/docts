@@ -2,8 +2,8 @@ import { relative, resolve } from "path";
 import { readFileSync, writeFileSync } from "fs";
 import {
   DoProject,
+  ensureRootIsValidFunctionsProject,
   functionNameRegex,
-  validateProjectRoot,
   packageNameRegex,
   scanProject
 } from "./utils.js";
@@ -12,7 +12,7 @@ import { rm } from "fs/promises";
 import inquirer from "inquirer";
 
 export default async function removeFunction(root: string, fnPath: string) {
-  validateProjectRoot(root);
+  ensureRootIsValidFunctionsProject(root);
 
   if (functionNameRegex.test(fnPath)) {
     await destroyFunction(root, fnPath);
@@ -24,9 +24,9 @@ export default async function removeFunction(root: string, fnPath: string) {
 }
 
 const destroyFunction = async (root: string, fnPath: string) => {
-  const projectFns = scanProject(root);
+  const scan = scanProject(root);
 
-  if (!projectFns.functions.existing.includes(fnPath)) {
+  if (!scan.functions.existing.includes(fnPath)) {
     throw `error: function '${fnPath}' does not exist in project`;
   }
 

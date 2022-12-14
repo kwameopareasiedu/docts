@@ -57,7 +57,7 @@ export const polyfillGlobals = () => {
   global.__dirname = dirname(fileURLToPath(import.meta.url));
 };
 
-export const validateProjectRoot = (root: string) => {
+export const ensureRootIsValidFunctionsProject = (root: string) => {
   const packageJson = resolve(root, "package.json");
   const projectYml = resolve(root, "project.yml");
   const srcDir = resolve(root, "src");
@@ -76,7 +76,7 @@ export const validateProjectRoot = (root: string) => {
 };
 
 export const scanProject = (root: string) => {
-  validateProjectRoot(root);
+  ensureRootIsValidFunctionsProject(root);
 
   const projectYml = resolve(root, "project.yml");
   const srcDir = resolve(root, "src");

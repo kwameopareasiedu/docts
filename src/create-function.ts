@@ -4,7 +4,7 @@ import {
   DoFunction,
   DoProject,
   functionNameRegex,
-  validateProjectRoot,
+  ensureRootIsValidFunctionsProject,
   listFiles,
   scanProject
 } from "./utils.js";
@@ -12,7 +12,7 @@ import { renderFile } from "ejs";
 import { parse, stringify } from "yaml";
 
 export default async function createFunction(root: string, fnPath: string) {
-  validateProjectRoot(root);
+  ensureRootIsValidFunctionsProject(root);
 
   if (!functionNameRegex.test(fnPath)) {
     throw "error function paths must be in the format 'package/function' (e.g. user/signup)";

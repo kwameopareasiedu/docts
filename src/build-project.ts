@@ -1,11 +1,15 @@
 import { relative, resolve } from "path";
-import { NpmProject, scanProject, validateProjectRoot } from "./utils.js";
+import {
+  NpmProject,
+  scanProject,
+  ensureRootIsValidFunctionsProject
+} from "./utils.js";
 import dependencyTree from "dependency-tree";
 import parseImports from "parse-imports";
 import { readFileSync, writeFileSync } from "fs";
 
 export default async function buildProject(root: string) {
-  validateProjectRoot(root);
+  ensureRootIsValidFunctionsProject(root);
 
   const scan = scanProject(root);
   const srcDir = resolve(root, "src");
@@ -15,7 +19,6 @@ export default async function buildProject(root: string) {
   const rootPackageConfig = JSON.parse(
     readFileSync(rootPackageJson, { encoding: "utf-8" })
   ) as NpmProject;
-  const rootPackageDependencies = rootPackageConfig.dependencies;
 
   for (const fnDir of fnDirs) {
     const fnIndexFileName = resolve(fnDir, "index.ts");
@@ -43,7 +46,7 @@ export default async function buildProject(root: string) {
         .filter(im => im.moduleSpecifier.type === "package")
         .reduce((imports, im) => {
           const importName = im.moduleSpecifier.value;
-          const importVersion = rootPackageDependencies[importName];
+          const importVersion = rootPackageConfig.dependencies[importName];
 
           if (importVersion) {
             return { ...imports, [importName]: importVersion };

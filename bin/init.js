@@ -5,8 +5,8 @@ import { renderFile } from "ejs";
 export default async function init(name, version, description, author) {
     const projectDir = resolve(process.cwd(), name);
     const templateDir = resolve(__dirname, "../templates/project");
-    const destFiles = existsSync(projectDir) ? readdirSync(projectDir) : [];
-    if (destFiles.length > 0) {
+    const existingFiles = existsSync(projectDir) ? readdirSync(projectDir) : [];
+    if (existingFiles.length > 0) {
         return console.error(`error: destination '${resolve(projectDir)}' is not empty`);
     }
     const templateFilesGenerator = listFiles(templateDir, []);
@@ -14,8 +14,8 @@ export default async function init(name, version, description, author) {
         const relativeSrc = relative(resolve(templateDir), src);
         const dest = resolve(resolve(projectDir), relativeSrc).replaceAll(".ejs", "");
         cpSync(src, dest, { recursive: true });
-        const data = { version, description, author };
         try {
+            const data = { version, description, author };
             const content = await renderFile(src, data);
             writeFileSync(dest, content);
         }

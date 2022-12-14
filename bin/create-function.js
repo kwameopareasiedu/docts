@@ -1,10 +1,10 @@
 import { relative, resolve } from "path";
 import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
-import { functionNameRegex, validateProjectRoot, listFiles, scanProject } from "./utils.js";
+import { functionNameRegex, ensureRootIsValidFunctionsProject, listFiles, scanProject } from "./utils.js";
 import { renderFile } from "ejs";
 import { parse, stringify } from "yaml";
 export default async function createFunction(root, fnPath) {
-    validateProjectRoot(root);
+    ensureRootIsValidFunctionsProject(root);
     if (!functionNameRegex.test(fnPath)) {
         throw "error function paths must be in the format 'package/function' (e.g. user/signup)";
     }

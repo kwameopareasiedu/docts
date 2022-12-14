@@ -43,7 +43,7 @@ export const polyfillGlobals = () => {
     // eslint-disable-next-line no-global-assign
     global.__dirname = dirname(fileURLToPath(import.meta.url));
 };
-export const validateProjectRoot = (root) => {
+export const ensureRootIsValidFunctionsProject = (root) => {
     const packageJson = resolve(root, "package.json");
     const projectYml = resolve(root, "project.yml");
     const srcDir = resolve(root, "src");
@@ -58,7 +58,7 @@ export const validateProjectRoot = (root) => {
     }
 };
 export const scanProject = (root) => {
-    validateProjectRoot(root);
+    ensureRootIsValidFunctionsProject(root);
     const projectYml = resolve(root, "project.yml");
     const srcDir = resolve(root, "src");
     const projectConfig = parse(readFileSync(projectYml, "utf-8"));
