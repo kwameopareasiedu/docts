@@ -31,6 +31,6 @@ describe("init.js", function () {
       fileCount += 1;
     }
 
-    expect(fileCount).to.be.equal(17);
+    expect(fileCount).to.be.equal(18);
   });
 });
