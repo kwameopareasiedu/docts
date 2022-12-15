@@ -9,7 +9,7 @@
   },
   "type": "module",
   "scripts": {
-    "build": "rollup --config",
+    "build": "tsc",
     "test": "ts-mocha -p tsconfig.json test/**/*.test.ts",
     "dev": "tsc --watch",
     "copy": "node bin/copy-template.js"
