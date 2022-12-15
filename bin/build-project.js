@@ -1,62 +1,64 @@
 import { relative, resolve } from "path";
 import { ensureRootIsValidFunctionsProject, scanProject } from "./utils.js";
-import dependencyTree from "dependency-tree";
-import parseImports from "parse-imports";
-import { cpSync, existsSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { rollup } from "rollup";
+import typescript from "@rollup/plugin-typescript";
+import { rm } from "fs/promises";
 export default async function buildProject(root) {
     ensureRootIsValidFunctionsProject(root);
     const scan = scanProject(root);
-    const fns = scan.functions.existing;
+    const fns = scan.functions.declared;
     const srcDir = resolve(root, "src");
     const packagesDir = resolve(root, "packages");
     const rootPackageJson = resolve(root, "package.json");
     const rootPackageConfig = JSON.parse(readFileSync(rootPackageJson, { encoding: "utf-8" }));
-    // Build dependency tree of function dirs
+    // Clear packages dir
+    await rm(packagesDir, { recursive: true, force: true });
     for (const fnPath of fns) {
         const fnSrcDir = resolve(srcDir, fnPath);
-        const fnPackageDir = resolve(packagesDir, fnPath);
-        const fnIndex = resolve(fnSrcDir, "index.ts");
-        const fnDependencyPaths = dependencyTree.toList({
-            filename: fnIndex,
-            directory: root,
-            noTypeDefinitions: true,
-            nodeModulesConfig: {
-                entry: "module"
-            }
-        });
-        let fnDependencies = {};
-        // For each function dependency, determine the package imports used
-        // and resolve the versions against the project's root package.json
-        for (const fnDependencyPath of fnDependencyPaths) {
-            const imports = [
-                ...(await parseImports(readFileSync(fnDependencyPath, { encoding: "utf-8" }), { resolveFrom: root }))
-            ];
-            const dependencies = imports
-                .filter(im => im.moduleSpecifier.type === "package")
-                .reduce((imports, im) => {
-                const importName = im.moduleSpecifier.value;
-                const importVersion = rootPackageConfig.dependencies[importName];
-                if (importVersion) {
-                    return { ...imports, [importName]: importVersion };
+        const fnPackagesDir = resolve(packagesDir, fnPath);
+        const fnSrcIndex = resolve(fnSrcDir, "index.ts");
+        if (existsSync(fnSrcIndex)) {
+            // Create the fn package dir
+            mkdirSync(fnPackagesDir, { recursive: true });
+            const build = await rollup({
+                input: fnSrcIndex,
+                plugins: [
+                    typescript({
+                        compilerOptions: {
+                            module: "esnext"
+                        }
+                    })
+                ]
+            });
+            const { output: buildOutput } = await build.generate({
+                format: "cjs"
+            });
+            let dependencies = {};
+            for (const chunk of buildOutput) {
+                if (chunk.type === "chunk") {
+                    const dependencyObject = chunk.imports.reduce((imports, _import) => {
+                        const version = rootPackageConfig.dependencies[_import];
+                        if (version) {
+                            return { ...imports, [_import]: version };
+                        }
+                        else
+                            return { ...imports };
+                    }, {});
+                    dependencies = { ...dependencies, ...dependencyObject };
+                    await build.write({
+                        file: resolve(fnPackagesDir, "index.js")
+                    });
+                    break;
                 }
-                else
-                    return { ...imports };
-            }, {});
-            fnDependencies = { ...fnDependencies, ...dependencies };
-        }
-        // Write function dependencies to its package.json file
-        const fnPackageJson = resolve(fnSrcDir, "package.json");
-        if (existsSync(fnPackageJson)) {
-            const fnPackageConfig = JSON.parse(readFileSync(fnPackageJson, { encoding: "utf-8" }));
-            const newFnPackageConfig = {
-                ...fnPackageConfig,
-                dependencies: fnDependencies
+            }
+            // Generate function packages/**/package.json file
+            const packageJson = {
+                main: "./index.js",
+                type: "module",
+                dependencies
             };
-            writeFileSync(fnPackageJson, JSON.stringify(newFnPackageConfig, null, 2));
-            // Copy 'src/<fnDir>/package.json' to 'packages/<fnDir>/package.json'
-            cpSync(fnPackageJson, resolve(fnPackageDir, "package.json"));
-            const dependencyCount = Object.keys(fnDependencies).length;
-            console.log(`updated ${dependencyCount} ${dependencyCount === 1 ? "dependency" : "dependencies"} in '${relative(srcDir, fnSrcDir)}/package.json'`);
+            writeFileSync(resolve(fnPackagesDir, "package.json"), JSON.stringify(packageJson, null, 2));
         }
         else {
             console.warn(`skipping '${relative(srcDir, fnSrcDir)}' due to missing package.json!`);
