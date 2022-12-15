@@ -3,7 +3,10 @@
   "version": "0.2.0",
   "description": "A CLI library which enhances the development experience of DigitalOcean 'doctl serverless' when working with Typescript function projects",
   "author": "Kwame Opare Asiedu",
-  "main": "dist/index.js",
+  "main": "bin/index.js",
+  "bin": {
+    "docts": "bin/index.js"
+  },
   "type": "module",
   "scripts": {
     "build": "rollup --config",
