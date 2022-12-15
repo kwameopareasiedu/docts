@@ -37,6 +37,6 @@ describe("init", function () {
       fileCount += 1;
     }
 
-    expect(fileCount).to.be.equal(18);
+    expect(fileCount).to.be.equal(12);
   });
 });
