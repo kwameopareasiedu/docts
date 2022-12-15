@@ -48,7 +48,7 @@ identified:
 
    This approach keep functions independent, however in a project with multiple
    functions which use the same libraries, you have to manage these dependencies
-   independently in all the function folders.
+   independently across all functions.
 
    You can see how this compounds as the number of functions in your serverless
    project grows.
@@ -68,6 +68,162 @@ Owing to the above issues, `docts` CLI has the following objectives:
 4. [x] In the build step, traverse through each function's `import` statements,
    building a dependency graph. From this graph, automatically pick out the
    function's dependencies and save in the function's `package.json`
-5. [x] Build `packages` folder in the correct structure for deployment with
-   `doctl`
-6. [ ] Bundle function file and all dependent files into one file
+5. [x] Build `packages` from `src` and generate `package.json` with correct
+   dependencies for each package
+
+## Installation
+
+Install the latest version of `docts` globally by running the following command
+in your terminal.
+
+```bash
+yarn global add docts-cli
+```
+
+## CLI Usage
+
+Here's the various features that `docts` provides
+
+### 1. Initialize Serverless Project
+
+```bash
+docts init <project name>
+```
+
+To start a new Digital serverless, run the command above. You'll be asked for
+the **project description**, **name of author** and **version number**.
+
+`docts` uses this information to create the project directory and copy the
+template files.
+
+### 2. Create New Serverless Function
+
+```bash
+docts fn new <function name>
+```
+
+When you want to add a new serverless function to your project, run the command
+above. The **function name** must be of the
+format `<package name>/<function name>`.
+
+As an example, to create a function called `create` in package `todo`, you'd
+run `docts fn new todo/create`.
+
+> `docts` automatically updates your `project.yml` with the function entry
+
+### 3. Remove Serverless Function
+
+```bash
+docts fn remove <function name>
+```
+
+To remove a new serverless function to your project, run the command above. You
+can either remove a single function or an entire package and all its functions.
+
+As an example, for a project structure shown below,
+running `docts fn remove todo/list` would delete the `src/todo/list` folder.
+
+However, running `docts fn remove todo` would delete the `src/todo` folder.
+
+```
+| src
+   | todo
+      | create
+         - index.ts
+      | list
+         - index.ts
+```
+
+> `docts` automatically updates your `project.yml`, removing the function or
+> package entry
+
+### 4. Scan Serverless Project
+
+```bash
+docts scan
+```
+
+Scans the `src/` directory and prints out a map of packages and functions.
+
+### 5. Build Serverless Project
+
+```bash
+docts build
+```
+
+Builds the `packages/` directory from `src/` which can be deployed
+to [DigitalOcean's App Platform](https://www.digitalocean.com/products/app-platform)
+app or a [Function Namespace](https://www.digitalocean.com/products/functions)
+via [doctl](https://docs.digitalocean.com/reference/doctl/).
+
+## Build Process
+
+After probing the inner workings of functions and extensive documentation
+reading, I discovered the constraints that a serverless project needs to meet in
+order to be deployable on App Platform.
+
+- Each function folder under `packages/` must have all its import dependencies
+  withing itself.
+
+  > If a function file imports a module outside the function folder in `src/`,
+  > our build process must include all dependencies in the final folder
+  > under `packages/`
+
+- The function folder can contain a single file which exports a name `main()`
+  function. If the folder has multiple files, or has dependencies, it must
+  a `package.json` indicating the main file as well as dependencies.
+
+Now that we know this, we can begin constructing our build process. Let's see
+what we need to do here:
+
+- We need some kind of bundling, so we can merge function files and import
+  dependencies into a single file
+- We need to determine the `node_modules` imports and
+- We need to generate each function's `package.json` which contains the entry
+  file and its dependencies
+
+After shopping around, the module bundler I settled on
+was [Rollup](https://rollupjs.org/). It's fast, lightweight and has a powerful
+JS API which handles all our needs.
+
+With all this information and tools, let's see how `docts` builds your project:
+
+1. Delete the `packages/` directory
+2. Scan the project to find package and function declarations
+3. For each declared function, determine the path to the `index.ts` in `src/`
+4. Use Rollup
+   to [build a module graph](https://rollupjs.org/guide/en/#rolluprollup)
+   starting from the `index.ts`
+5. Use Rollup to generate the bundle code and resolve `node_modules/`
+   imports
+6. Write the bundle code to the corresponding file under `packages/`
+7. Lookup the `node_modules/` imports in the root `package.json` to get
+   their versions
+8. Write the dependencies to the function's `package.json` under `packages/`
+
+And we are done! At this point we have an App Platform compatible `packages/`
+directory that can be deployed.
+
+## Testing
+
+The `test/` folder contains the unit tests for each CLI functions. The tests are
+written with [Mocha](https://mochajs.org/) and [Chai](https://www.chaijs.com/)
+Clone the project and run them using the following command:
+
+```bash
+yarn test
+```
+
+## Roadmap
+
+I created this project to improve the development experience for myself and
+other devs in the DigitalOcean community. I believe we can collectively improve
+and extend the project features.
+
+### Serverless Offline Testing
+
+The next major feature is to include a way of testing  functions offline before
+deployment. Any and all contributions from the community are greatly welcome.
+
+## Contributors
+- [Kwame Opare Asiedu](https://github.com/kwameopareasiedu)
