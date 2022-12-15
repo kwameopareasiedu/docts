@@ -32,9 +32,9 @@ using it for a while, I find it ... _somewhat lacking_.
 
 ## Issues with `doctl serverless function`
 
-When dealing with **Typescript**, there is a transpilation step to Javascript
-which other languages have and aside initializing the Typescript project, the
-`doctl serverless function` interface does not do much locally.
+When working with **Typescript**, there is a transpilation step to Javascript
+which other supported languages don't have and aside initializing the Typescript
+project, the `doctl serverless function` interface does not do much locally.
 
 The transpilation of TS to JS makes things a bit tricky for working with
 Typescript projects. Here's three of the major issues (in my opinion) I've
@@ -222,8 +222,9 @@ and extend the project features.
 
 ### Serverless Offline Testing
 
-The next major feature is to include a way of testing  functions offline before
+The next major feature is to include a way of testing functions offline before
 deployment. Any and all contributions from the community are greatly welcome.
 
 ## Contributors
+
 - [Kwame Opare Asiedu](https://github.com/kwameopareasiedu)
