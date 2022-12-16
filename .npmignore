@@ -10,8 +10,6 @@ test
 .mocharc.json
 .prettierrc.json
 tsconfig.json
-yarn.lock
-package-lock.json
 *.iml
 *.tgz
 *.ini
