@@ -1,5 +1,7 @@
 # `docts`
 
+[![](https://img.shields.io/badge/github-star-green)](https://github.com/kwameopareasiedu/docts) ![](https://img.shields.io/badge/unpacked%20size-31.9%20kB-blue)
+
 **D**igital**O**cean **C**li **T**ypescript **S**erverless (`docts`) is a
 community-led CLI library which enhances the development experience of
 DigitalOcean [doctl serverless](https://docs.digitalocean.com/reference/doctl/)
@@ -163,22 +165,23 @@ reading, I discovered the constraints that a serverless project needs to meet in
 order to be deployable on App Platform.
 
 - Each function folder under `packages/` must have all its import dependencies
-  withing itself.
+  within itself.
 
   > If a function file imports a module outside the function folder in `src/`,
   > our build process must include all dependencies in the final folder
   > under `packages/`
 
 - The function folder can contain a single file which exports a name `main()`
-  function. If the folder has multiple files, or has dependencies, it must
-  a `package.json` indicating the main file as well as dependencies.
+  function. If the folder has multiple files, or has dependencies, it must have
+  a `package.json` indicating the entry file as well as dependencies.
 
-Now that we know this, we can begin constructing our build process. Let's see
-what we need to do here:
+With this information, we can kinda see how our build process should look like.
+Let's see what we need to do here:
 
 - We need some kind of bundling, so we can merge function files and import
   dependencies into a single file
-- We need to determine the `node_modules` imports and
+- We need to determine the `node_modules` imports in the function file as well
+  as all its dependencies
 - We need to generate each function's `package.json` which contains the entry
   file and its dependencies
 
@@ -186,20 +189,25 @@ After shopping around, the module bundler I settled on
 was [Rollup](https://rollupjs.org/). It's fast, lightweight and has a powerful
 JS API which handles all our needs.
 
-With all this information and tools, let's see how `docts` builds your project:
+Ok, now we know how to go about it and what tool to use. Let's outline the build
+process of `docts`:
 
 1. Delete the `packages/` directory
 2. Scan the project to find package and function declarations
-3. For each declared function, determine the path to the `index.ts` in `src/`
+3. For each declared function, get the index file at
+   `src/<package-name>/<function-name>/index.ts`
 4. Use Rollup
    to [build a module graph](https://rollupjs.org/guide/en/#rolluprollup)
    starting from the `index.ts`
-5. Use Rollup to generate the bundle code and resolve `node_modules/`
-   imports
-6. Write the bundle code to the corresponding file under `packages/`
-7. Lookup the `node_modules/` imports in the root `package.json` to get
-   their versions
-8. Write the dependencies to the function's `package.json` under `packages/`
+5. Use Rollup to generate the bundle code and gather imports
+   from `node_modules/`
+6. Save the generated bundle code to the function's output file at
+   `packages/<package-name>/<function-name>/index.js`
+7. Lookup the function imports in the project `package.json` to get their
+   versions
+8. Save the dependencies to the function's `package.json` at
+   `packages/<package-name>/<function-name>/package.json`
+9. Repeat steps (3) to (8) for all functions in `src/`
 
 And we are done! At this point we have an App Platform compatible `packages/`
 directory that can be deployed.
