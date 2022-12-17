@@ -88,9 +88,10 @@ docts.addCommand((() => {
 docts
     .command("build")
     .description("Builds a project 'src' into 'packages' for deployment")
-    .action(async () => {
+    .option("-d, --include-dependencies <deps...>", "A list of dependencies to include in the bundled function files")
+    .action(async ({ includeDependencies }) => {
     try {
-        await buildProject(process.cwd());
+        await buildProject(process.cwd(), includeDependencies);
     }
     catch (err) {
         console.error(err.message || err.toString());

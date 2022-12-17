@@ -4,7 +4,14 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { rollup } from "rollup";
 import typescript from "@rollup/plugin-typescript";
 import { rm } from "fs/promises";
-export default async function buildProject(root) {
+import nodeResolve from "@rollup/plugin-node-resolve";
+import commonJs from "@rollup/plugin-commonjs";
+/**
+ * @param root The project root path
+ * @param includedPackages A list of packages to include in the bundle
+ * instead of marking them as external
+ */
+export default async function buildProject(root, includedPackages = []) {
     ensureRootIsValidFunctionsProject(root);
     const scan = scanProject(root);
     const fns = scan.functions.declared;
@@ -21,19 +28,26 @@ export default async function buildProject(root) {
         if (existsSync(fnSrcIndex)) {
             // Create the fn package dir
             mkdirSync(fnPackagesDir, { recursive: true });
+            const plugins = [
+                typescript({
+                    compilerOptions: {
+                        module: "esnext"
+                    }
+                })
+            ];
+            // If packages are to be included in build,
+            // include the @rollup/plugin-node-resolve
+            // and @rollup/plugin-commonjs plugins
+            if (includedPackages.length > 0) {
+                plugins.push(nodeResolve({
+                    resolveOnly: includedPackages
+                }), commonJs());
+            }
             const build = await rollup({
                 input: fnSrcIndex,
-                plugins: [
-                    typescript({
-                        compilerOptions: {
-                            module: "esnext"
-                        }
-                    })
-                ]
+                plugins
             });
-            const { output: buildOutput } = await build.generate({
-                format: "cjs"
-            });
+            const { output: buildOutput } = await build.generate({});
             let dependencies = {};
             for (const chunk of buildOutput) {
                 if (chunk.type === "chunk") {
