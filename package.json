@@ -1,6 +1,6 @@
 {
   "name": "docts-cli",
-  "version": "1.1.0-test",
+  "version": "1.1.0",
   "description": "A CLI library which enhances the development experience of DigitalOcean 'doctl serverless' when working with Typescript function projects",
   "author": "Kwame Opare Asiedu",
   "homepage": "https://github.com/kwameopareasiedu/docts#readme",
