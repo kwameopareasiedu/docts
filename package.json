@@ -1,6 +1,6 @@
 {
   "name": "docts-cli",
-  "version": "1.0.1",
+  "version": "1.1.0-test",
   "description": "A CLI library which enhances the development experience of DigitalOcean 'doctl serverless' when working with Typescript function projects",
   "author": "Kwame Opare Asiedu",
   "homepage": "https://github.com/kwameopareasiedu/docts#readme",
@@ -28,11 +28,11 @@
     "@types/ejs": "^3.1.1",
     "@types/inquirer": "^9.0.3",
     "@types/mocha": "^10.0.0",
-    "@types/node": "^18.11.15",
+    "@types/node": "^18.11.17",
     "@typescript-eslint/eslint-plugin": "^5.46.1",
     "@typescript-eslint/parser": "^5.46.1",
     "chai": "^4.3.6",
-    "eslint": "^8.25.0",
+    "eslint": "^8.30.0",
     "mocha": "^10.2.0",
     "prettier": "2.8.1",
     "ts-mocha": "^10.0.0",
@@ -41,11 +41,13 @@
     "typescript": "^4.8.4"
   },
   "dependencies": {
+    "@rollup/plugin-commonjs": "^23.0.7",
+    "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-typescript": "^10.0.1",
     "commander": "^9.4.1",
     "ejs": "^3.1.8",
     "inquirer": "9.1.4",
-    "rollup": "^3.7.4",
+    "rollup": "^3.7.5",
     "yaml": "^2.1.3"
   }
 }

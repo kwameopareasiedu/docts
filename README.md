@@ -1,6 +1,6 @@
 # `docts`
 
-[![](https://img.shields.io/badge/github-star-green)](https://github.com/kwameopareasiedu/docts) ![](https://img.shields.io/badge/unpacked%20size-31.9%20kB-blue)
+[![](https://img.shields.io/badge/github-star-green)](https://github.com/kwameopareasiedu/docts) ![](https://img.shields.io/badge/unpacked%20size-33.9%20kB-blue)
 
 **D**igital**O**cean **C**li **T**ypescript **S**erverless (`docts`) is a
 community-led CLI library which enhances the development experience of
@@ -65,13 +65,13 @@ Owing to the above issues, `docts` CLI has the following objectives:
 
 1. [x] Create a **Typescript** serverless project with a modified file structure
 2. [x] Add/Remove functions to/from your serverless project and automatically
-   update the `project.yml`.
+       update the `project.yml`.
 3. [x] Install dependencies in the project root instead of function roots
 4. [x] In the build step, traverse through each function's `import` statements,
-   building a dependency graph. From this graph, automatically pick out the
-   function's dependencies and save in the function's `package.json`
+       building a dependency graph. From this graph, automatically pick out the
+       function's dependencies and save in the function's `package.json`
 5. [x] Build `packages` from `src` and generate `package.json` with correct
-   dependencies for each package
+       dependencies for each package
 
 ## Installation
 
@@ -150,7 +150,13 @@ Scans the `src/` directory and prints out a map of packages and functions.
 ### 5. Build Serverless Project
 
 ```bash
+# Build project, marking all dependencies as external
 docts build
+
+# To include dependencies in bundle, use --include-dependencies, -d option
+docts build --include-dependencies dayjs @acme/core
+#or
+docts build -d dayjs @acme/core
 ```
 
 Builds the `packages/` directory from `src/` which can be deployed
@@ -236,3 +242,13 @@ deployment. Any and all contributions from the community are greatly welcome.
 ## Contributors
 
 - [Kwame Opare Asiedu](https://github.com/kwameopareasiedu)
+
+## Change Log
+
+- `1.1.0 (Current)`
+
+  - Added `--include-dependencies`, `-d` switch to `build` command. This is a
+    list of dependencies to include in the bundle instead of marking them as
+    external.
+
+    E.g. `docts build --include-dependencies dayjs @acme/core`

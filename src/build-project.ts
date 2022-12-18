@@ -5,11 +5,21 @@ import {
   scanProject
 } from "./utils.js";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
-import { rollup } from "rollup";
+import { InputPluginOption, rollup } from "rollup";
 import typescript from "@rollup/plugin-typescript";
 import { rm } from "fs/promises";
+import nodeResolve from "@rollup/plugin-node-resolve";
+import commonJs from "@rollup/plugin-commonjs";
 
-export default async function buildProject(root: string) {
+/**
+ * @param root The project root path
+ * @param includedPackages A list of packages to include in the bundle
+ * instead of marking them as external
+ */
+export default async function buildProject(
+  root: string,
+  includedPackages: Array<string> = []
+) {
   ensureRootIsValidFunctionsProject(root);
 
   const scan = scanProject(root);
@@ -33,20 +43,32 @@ export default async function buildProject(root: string) {
       // Create the fn package dir
       mkdirSync(fnPackagesDir, { recursive: true });
 
+      const plugins: Array<InputPluginOption> = [
+        typescript({
+          compilerOptions: {
+            module: "esnext"
+          }
+        })
+      ];
+
+      // If packages are to be included in build,
+      // include the @rollup/plugin-node-resolve
+      // and @rollup/plugin-commonjs plugins
+      if (includedPackages.length > 0) {
+        plugins.push(
+          nodeResolve({
+            resolveOnly: includedPackages
+          }),
+          commonJs()
+        );
+      }
+
       const build = await rollup({
         input: fnSrcIndex,
-        plugins: [
-          typescript({
-            compilerOptions: {
-              module: "esnext"
-            }
-          })
-        ]
+        plugins
       });
 
-      const { output: buildOutput } = await build.generate({
-        format: "cjs"
-      });
+      const { output: buildOutput } = await build.generate({});
 
       let dependencies = {};
 
