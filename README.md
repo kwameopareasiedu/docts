@@ -1,6 +1,6 @@
 # `docts`
 
-[![](https://img.shields.io/badge/github-star-green)](https://github.com/kwameopareasiedu/docts) ![](https://img.shields.io/badge/unpacked%20size-31.9%20kB-blue)
+[![](https://img.shields.io/badge/github-star-green)](https://github.com/kwameopareasiedu/docts) ![](https://img.shields.io/badge/unpacked%20size-33.9%20kB-blue)
 
 **D**igital**O**cean **C**li **T**ypescript **S**erverless (`docts`) is a
 community-led CLI library which enhances the development experience of
