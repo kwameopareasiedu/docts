@@ -1,7 +1,7 @@
 # `docts`
 
 [![](https://img.shields.io/badge/github-star-green)](https://github.com/kwameopareasiedu/docts)
-![](https://img.shields.io/badge/unpacked%20size-71.0%20kB-blue)
+![](https://img.shields.io/badge/unpacked%20size-34.1%20kB-blue)
 ![](https://img.shields.io/badge/nodejs-16.19.1+-blue)
 
 **D**igital**O**cean **C**li **T**ypescript **S**erverless (`docts`) is a
