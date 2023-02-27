@@ -75,7 +75,7 @@ export default async function buildProject(root, includedPackages = []) {
             writeFileSync(resolve(fnPackagesDir, "package.json"), JSON.stringify(packageJson, null, 2));
         }
         else {
-            console.warn(`skipping '${relative(srcDir, fnSrcDir)}' due to missing package.json!`);
+            console.warn(`skipping '${relative(srcDir, fnSrcDir)}' due to missing index.ts!`);
         }
     }
     console.log("\nBuilt 'src' into 'packages' dir. You can deploy with doctl!");

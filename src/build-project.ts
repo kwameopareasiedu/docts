@@ -105,7 +105,7 @@ export default async function buildProject(
       );
     } else {
       console.warn(
-        `skipping '${relative(srcDir, fnSrcDir)}' due to missing package.json!`
+        `skipping '${relative(srcDir, fnSrcDir)}' due to missing index.ts!`
       );
     }
   }

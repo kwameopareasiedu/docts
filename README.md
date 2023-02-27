@@ -1,6 +1,8 @@
 # `docts`
 
-[![](https://img.shields.io/badge/github-star-green)](https://github.com/kwameopareasiedu/docts) ![](https://img.shields.io/badge/unpacked%20size-33.9%20kB-blue)
+[![](https://img.shields.io/badge/github-star-green)](https://github.com/kwameopareasiedu/docts)
+![](https://img.shields.io/badge/unpacked%20size-71.0%20kB-blue)
+![](https://img.shields.io/badge/nodejs-16.19.1+-blue)
 
 **D**igital**O**cean **C**li **T**ypescript **S**erverless (`docts`) is a
 community-led CLI library which enhances the development experience of
@@ -245,7 +247,12 @@ deployment. Any and all contributions from the community are greatly welcome.
 
 ## Change Log
 
-- `1.1.0 (Current)`
+- `1.1.1 (Current)`
+
+  - Fixed path of default function from ~~`/src/sample/hello/hello.ts`~~
+    to `/src/sample/hello/index.ts`
+
+- `1.1.0`
 
   - Added `--include-dependencies`, `-d` switch to `build` command. This is a
     list of dependencies to include in the bundle instead of marking them as
