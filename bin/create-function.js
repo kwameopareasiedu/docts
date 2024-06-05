@@ -42,7 +42,7 @@ export default async function createFunction(root, fnPath) {
         name: fnName,
         binary: false,
         main: "",
-        runtime: "nodejs:default",
+        runtime: "nodejs:18",
         web: true,
         parameters: {},
         environment: {},

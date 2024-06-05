@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { Command, program as docts } from "commander";
+import { Command } from "commander";
 import inquirer from "inquirer";
 import init from "./init.js";
 import createFunction from "./create-function.js";
@@ -9,12 +9,11 @@ import buildProject from "./build-project.js";
 
 polyfillGlobals();
 
-docts
-  .name("docts")
-  .description(
-    "Enhances the development experience of DigitalOcean 'doctl serverless' when working with Typescript function projects"
-  )
-  .version("0.1.0");
+const docts = new Command("docts");
+docts.description(
+  "Enhances the development experience of DigitalOcean 'doctl serverless' when working with Typescript function projects"
+);
+docts.version("1.2.0");
 
 docts
   .command("init")

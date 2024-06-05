@@ -56,17 +56,12 @@ export default async function buildProject(
       // and @rollup/plugin-commonjs plugins
       if (includedPackages.length > 0) {
         plugins.push(
-          nodeResolve({
-            resolveOnly: includedPackages
-          }),
+          nodeResolve({ resolveOnly: includedPackages }),
           commonJs()
         );
       }
 
-      const build = await rollup({
-        input: fnSrcIndex,
-        plugins
-      });
+      const build = await rollup({ input: fnSrcIndex, plugins });
 
       const { output: buildOutput } = await build.generate({});
 
@@ -110,5 +105,7 @@ export default async function buildProject(
     }
   }
 
-  console.log("\nBuilt 'src' into 'packages' dir. You can deploy with doctl!");
+  console.log(
+    "\nBuilt 'packages' dir successfully! Ready to deploy with doctl!"
+  );
 }

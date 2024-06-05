@@ -67,13 +67,13 @@ Owing to the above issues, `docts` CLI has the following objectives:
 
 1. [x] Create a **Typescript** serverless project with a modified file structure
 2. [x] Add/Remove functions to/from your serverless project and automatically
-       update the `project.yml`.
+   update the `project.yml`.
 3. [x] Install dependencies in the project root instead of function roots
 4. [x] In the build step, traverse through each function's `import` statements,
-       building a dependency graph. From this graph, automatically pick out the
-       function's dependencies and save in the function's `package.json`
+   building a dependency graph. From this graph, automatically pick out the
+   function's dependencies and save in the function's `package.json`
 5. [x] Build `packages` from `src` and generate `package.json` with correct
-       dependencies for each package
+   dependencies for each package
 
 ## Installation
 
@@ -247,15 +247,23 @@ deployment. Any and all contributions from the community are greatly welcome.
 
 ## Change Log
 
-- `1.1.1 (Current)`
+- `1.2.0 (Current)`
 
-  - Fixed path of default function from ~~`/src/sample/hello/hello.ts`~~
-    to `/src/sample/hello/index.ts`
+    - Added `http` object to `DoFunctionArgs`
+      interface ([Docs](https://docs.digitalocean.com/products/functions/reference/parameters-responses/#parsed-web-events))
+    - Deprecated `__ow_*` fields in `DoFunctionArgs` interface
+    - Updated nodejs runtime in `project.yml` template to '18' instead of '
+      default' (14)
+
+- `1.1.1`
+
+    - Fixed path of default function from ~~`/src/sample/hello/hello.ts`~~
+      to `/src/sample/hello/index.ts`
 
 - `1.1.0`
 
-  - Added `--include-dependencies`, `-d` switch to `build` command. This is a
-    list of dependencies to include in the bundle instead of marking them as
-    external.
+    - Added `--include-dependencies`, `-d` switch to `build` command. This is a
+      list of dependencies to include in the bundle instead of marking them as
+      external.
 
-    E.g. `docts build --include-dependencies dayjs @acme/core`
+      E.g. `docts build --include-dependencies dayjs @acme/core`
