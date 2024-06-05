@@ -39,14 +39,9 @@ export default async function buildProject(root, includedPackages = []) {
             // include the @rollup/plugin-node-resolve
             // and @rollup/plugin-commonjs plugins
             if (includedPackages.length > 0) {
-                plugins.push(nodeResolve({
-                    resolveOnly: includedPackages
-                }), commonJs());
+                plugins.push(nodeResolve({ resolveOnly: includedPackages }), commonJs());
             }
-            const build = await rollup({
-                input: fnSrcIndex,
-                plugins
-            });
+            const build = await rollup({ input: fnSrcIndex, plugins });
             const { output: buildOutput } = await build.generate({});
             let dependencies = {};
             for (const chunk of buildOutput) {
@@ -78,5 +73,5 @@ export default async function buildProject(root, includedPackages = []) {
             console.warn(`skipping '${relative(srcDir, fnSrcDir)}' due to missing index.ts!`);
         }
     }
-    console.log("\nBuilt 'src' into 'packages' dir. You can deploy with doctl!");
+    console.log("\nBuilt 'packages' dir successfully! Ready to deploy with doctl!");
 }
